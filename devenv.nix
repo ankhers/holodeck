@@ -7,6 +7,8 @@ let
   postgres = pkgs.postgresql_18;
 in
 {
+  packages = [ pkgs.biome ];
+
   languages = {
     nix.enable = true;
 
@@ -16,6 +18,14 @@ in
       lsp = {
         enable = true;
         package = expert;
+      };
+    };
+
+    javascript = {
+      enable = true;
+
+      npm = {
+        enable = true;
       };
     };
   };

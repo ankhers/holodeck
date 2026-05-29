@@ -24,7 +24,7 @@ defmodule HolodeckWeb.Endpoint do
     at: "/",
     from: :holodeck,
     gzip: not code_reloading?,
-    only: HolodeckWeb.static_paths(),
+    only: ["hologram" | HolodeckWeb.static_paths()],
     raise_on_missing_only: code_reloading?
 
   # Code reloading can be explicitly enabled under the
@@ -51,5 +51,6 @@ defmodule HolodeckWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
+  plug Hologram.Router
   plug HolodeckWeb.Router
 end
