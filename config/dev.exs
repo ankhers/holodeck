@@ -4,7 +4,6 @@ import Config
 config :holodeck, Holodeck.Repo,
   username: "postgres",
   password: "postgres",
-  hostname: "localhost",
   database: "holodeck_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
