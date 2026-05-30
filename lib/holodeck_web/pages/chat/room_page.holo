@@ -1,0 +1,23 @@
+<div style="min-height: 100vh; background: #0f1014; color: #eeeeee; display: flex; flex-direction: column; font-family: monospace;">
+
+  <div style="background: #13131a; border-bottom: 1px solid #262626; padding: 12px 16px; display: flex; align-items: center; gap: 12px;">
+    <Hologram.UI.Link to={HolodeckWeb.Chat.LobbyPage} style="color: #a78bfa; font-family: monospace; font-size: 13px; text-decoration: none;">← Lobby</Hologram.UI.Link>
+    <span style="color: #eabeff; font-weight: bold;"># {@room.name}</span>
+  </div>
+
+  <div style="flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 10px;">
+    {%for message <- @messages}
+      <div>
+        <span style={"color: " <> username_colour(message.username) <> "; font-size: 12px;"}>{message.username}</span>
+        <span style="color: #444; font-size: 11px; margin-left: 8px;">{message.inserted_at}</span>
+        <div style="color: #c2c2c2; margin-top: 2px;">{message.message}</div>
+      </div>
+    {/for}
+  </div>
+
+  <form $submit="send_message" style="border-top: 1px solid #262626; padding: 12px 16px; display: flex; gap: 8px; background: #0f1014;">
+    <input type="text" name="message" placeholder="Type a message..." autocomplete="off" style="flex: 1; background: #13131a; border: 1px solid #363636; border-radius: 4px; padding: 8px 12px; color: #eeeeee; font-family: monospace; font-size: 13px; outline: none;" />
+    <button type="submit" style="background: #a78bfa; color: #0f1014; border: none; border-radius: 4px; padding: 8px 16px; font-weight: 600; cursor: pointer; font-family: monospace;">Send</button>
+  </form>
+
+</div>

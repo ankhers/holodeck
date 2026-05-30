@@ -19,6 +19,18 @@ defmodule HolodeckWeb do
 
   def static_paths, do: ~w(assets fonts images favicon.ico robots.txt)
 
+  def layout do
+    quote do
+      use Hologram.Component
+    end
+  end
+
+  def page do
+    quote do
+      use Hologram.Page
+    end
+  end
+
   def router do
     quote do
       use Phoenix.Router, helpers: false
