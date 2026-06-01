@@ -27,6 +27,5 @@ defmodule Holodeck.Chat do
 
   def get_messages_for_room(room) do
     Repo.all(from m in Message, where: m.room_id == ^room.id, order_by: {:desc, m.inserted_at})
-    |> dbg()
   end
 end

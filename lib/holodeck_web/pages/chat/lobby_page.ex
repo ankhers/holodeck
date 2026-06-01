@@ -26,7 +26,9 @@ defmodule HolodeckWeb.Chat.LobbyPage do
   end
 
   def action(:save_username, params, component) do
-    put_command(component, :save_username, username: params.event["username"])
+    component
+    |> put_command(:save_username, username: params.event["username"])
+    |> put_state(username: params.event["username"])
   end
 
   def command(:create_room, params, server) do
@@ -34,7 +36,6 @@ defmodule HolodeckWeb.Chat.LobbyPage do
 
     case Chat.create_room(params.room_name, username) do
       {:ok, room} ->
-        # TODO: Forward to new room page
         put_action(server, :room_created, room: room)
 
       {:error, reason} ->

@@ -52,7 +52,7 @@ defmodule Holodeck.MixProject do
        app: false,
        compile: false,
        depth: 1},
-      {:hologram, "~> 0.9.0"},
+      {:hologram, "~> 0.9.1"},
       {:jason, "~> 1.2"},
       {:lazy_html, ">= 0.1.0", only: :test},
       {:phoenix, "~> 1.8.7"},
