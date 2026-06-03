@@ -13,21 +13,29 @@ defmodule HolodeckWeb.Chat.RoomPage do
     room = Chat.get_room_by_name(params.room_name)
     messages = Chat.get_messages_for_room(room)
 
-    component = put_state(component, messages: messages, room: room, username: username)
+    component =
+      put_state(component, messages: messages, room: room, username: username, draft: "")
+
     server = put_subscription(server, {:chat_room, room.name})
 
     {component, server}
   end
 
-  def action(:send_message, params, component) do
+  def action(:update_draft, params, component) do
+    put_state(component, :draft, params.event.value)
+  end
+
+  def action(:send_message, _params, component) do
     username = component.state.username
     room = component.state.room
 
-    put_command(component, :send_message, %{
+    component
+    |> put_command(:send_message, %{
       username: username,
       room: room,
-      message: params.event["message"]
+      message: component.state.draft
     })
+    |> put_state(:draft, "")
   end
 
   def action(:add_message, params, component) do
