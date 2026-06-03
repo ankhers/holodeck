@@ -10,6 +10,7 @@ defmodule HolodeckWeb.Chat.Layout do
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>Holodeck</title>
         <Hologram.UI.Runtime />
+        <link rel="stylesheet" href="/assets/css/app.css" />
       </head>
       <body style="margin: 0; padding: 0; background: #0f1014;">
         <slot />

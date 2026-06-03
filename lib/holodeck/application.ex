@@ -7,6 +7,8 @@ defmodule Holodeck.Application do
 
   @impl true
   def start(_type, _args) do
+    HolodeckWeb.LogBroadcaster.attach()
+
     children = [
       HolodeckWeb.Telemetry,
       Holodeck.Repo,

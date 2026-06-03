@@ -1,0 +1,171 @@
+
+<div style="background: #0f1014; color: #eeeeee; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 14px; min-height: 100vh; position: relative; overflow-x: hidden;">
+
+  <!-- Grain overlay -->
+  <div style="position: fixed; inset: 0; background-image: url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E&quot;); background-size: 256px 256px; pointer-events: none; z-index: 0; opacity: 0.025;"></div>
+
+  <!-- Violet glow -->
+  <div style="position: fixed; top: -30%; left: 50%; transform: translateX(-50%); width: 70vw; height: 50vh; background: radial-gradient(ellipse, rgba(167,139,250,0.1) 0%, transparent 70%); pointer-events: none; z-index: 0;"></div>
+
+  <div style="position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding: 0 24px 48px;">
+
+    <!-- Navbar -->
+    <nav style="display: flex; align-items: center; justify-content: space-between; padding: 18px 0; margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.08);">
+      <div style="display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; letter-spacing: -0.01em;">
+        <div style="width: 28px; height: 28px; border-radius: 7px; background: linear-gradient(135deg, #7c3aed, #a78bfa); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: white; flex-shrink: 0; box-shadow: 0 0 14px rgba(167,139,250,0.45), 0 0 0 1px rgba(167,139,250,0.2);">H</div>
+        Holodeck
+        <span style="color: rgba(194,194,194,0.5); margin: 0 1px;">/</span>
+        <span style="color: #c2c2c2; font-weight: 400;">Dashboard</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #4ade80; background: rgba(74,222,128,0.07); border: 1px solid rgba(74,222,128,0.18); padding: 4px 11px; border-radius: 20px;">
+        <div class="hd-live-dot"></div>
+        connected
+      </div>
+    </nav>
+
+    <!-- Top row: Metrics + Processes -->
+    <div style="display: grid; grid-template-columns: 355px 1fr; gap: 12px; margin-bottom: 12px;">
+
+      <!-- System Metrics -->
+      <div style="background: #1a1b21; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 20px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px;">
+          <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(194,194,194,0.5);">System Metrics</span>
+          <span style="display: flex; align-items: center; gap: 5px; font-size: 11px; color: #4ade80; font-weight: 500;"><div class="hd-live-dot"></div> live</span>
+        </div>
+
+        <!-- CPU -->
+        <div style="margin-bottom: 18px;">
+          <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: rgba(194,194,194,0.5); margin-bottom: 10px;">CPU</div>
+          {%for {core, percent_used, _, _} <- @system_metrics.cpu}
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 7px;">
+              <span style="font-size: 11px; color: #c2c2c2; width: 60px; flex-shrink: 0; font-family: ui-monospace, monospace;">Core {core}</span>
+              <div style="flex: 1; height: 5px; border-radius: 99px; background: rgba(255,255,255,0.06); overflow: hidden;"><div style={"height: 100%; border-radius: 99px; width: #{format_percent(percent_used)}%; background: #{bar_colour(percent_used)};"}></div></div>
+              <span style="font-size: 11px; color: rgba(194,194,194,0.5); width: 52px; text-align: right; font-family: ui-monospace, monospace;">{format_percent(percent_used)}%</span>
+            </div>
+          {/for}
+        </div>
+
+        <!-- Memory -->
+        <div style="margin-bottom: 18px;">
+          <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: rgba(194,194,194,0.5); margin-bottom: 10px;">Memory</div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+            <span style="font-size: 11px; color: #c2c2c2;">Total</span>
+            <span style="font-size: 11px; color: #c2c2c2; font-family: ui-monospace, monospace;">{format_bytes(@system_metrics.memory.total)}</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 7px;">
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 7px; padding: 9px 11px;">
+              <div style="font-size: 10px; color: rgba(194,194,194,0.5); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Atom</div>
+              <div style="font-size: 14px; font-weight: 600; color: #eeeeee; font-family: ui-monospace, monospace;">{format_bytes(@system_metrics.memory.atom)}</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 7px; padding: 9px 11px;">
+              <div style="font-size: 10px; color: rgba(194,194,194,0.5); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Binary</div>
+              <div style="font-size: 14px; font-weight: 600; color: #eeeeee; font-family: ui-monospace, monospace;">{format_bytes(@system_metrics.memory.binary)}</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 7px; padding: 9px 11px;">
+              <div style="font-size: 10px; color: rgba(194,194,194,0.5); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Code</div>
+              <div style="font-size: 14px; font-weight: 600; color: #eeeeee; font-family: ui-monospace, monospace;">{format_bytes(@system_metrics.memory.code)}</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 7px; padding: 9px 11px;">
+              <div style="font-size: 10px; color: rgba(194,194,194,0.5); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">ETS</div>
+              <div style="font-size: 14px; font-weight: 600; color: #eeeeee; font-family: ui-monospace, monospace;">{format_bytes(@system_metrics.memory.ets)}</div>
+            </div>
+          </div>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 16px 0;" />
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 7px;">
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 7px; padding: 9px 11px;">
+            <div style="font-size: 10px; color: rgba(194,194,194,0.5); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Uptime</div>
+            <div style="font-size: 14px; font-weight: 600; color: #eeeeee; font-family: ui-monospace, monospace;">{format_uptime(@system_metrics.uptime)}</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 7px; padding: 9px 11px;">
+            <div style="font-size: 10px; color: rgba(194,194,194,0.5); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">BEAM / OTP</div>
+            <div style="font-size: 14px; font-weight: 600; color: #eeeeee; font-family: ui-monospace, monospace;">{@system_metrics.elixir} / {@system_metrics.otp}</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 7px; padding: 9px 11px;">
+            <div style="font-size: 10px; color: rgba(194,194,194,0.5); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Schedulers</div>
+            <div style="font-size: 14px; font-weight: 600; color: #eeeeee; font-family: ui-monospace, monospace;">{@system_metrics.schedulers.online} / {@system_metrics.schedulers.total}</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 7px; padding: 9px 11px;">
+            <div style="font-size: 10px; color: rgba(194,194,194,0.5); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Processes</div>
+            <div style="font-size: 14px; font-weight: 600; color: #eeeeee; font-family: ui-monospace, monospace;">{format_integer(@system_metrics.process_count)}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Process List -->
+      <div style="background: #1a1b21; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 20px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(194,194,194,0.5);">Processes</span>
+            <span style="font-size: 11px; color: rgba(194,194,194,0.5);">{format_integer(@system_metrics.process_count)} total</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 5px;">
+              <span style="font-size: 10px; color: rgba(194,194,194,0.5);">sort</span>
+              <button class={sort_button_class(@process_sort, :memory)} $click="sort_memory">memory</button>
+              <button class={sort_button_class(@process_sort, :reductions)} $click="sort_reductions">reductions</button>
+              <button class={sort_button_class(@process_sort, :pid)} $click="sort_pid">pid</button>
+            </div>
+            <span style="display: flex; align-items: center; gap: 5px; font-size: 11px; color: #4ade80; font-weight: 500;"><div class="hd-live-dot"></div> live</span>
+          </div>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr>
+              <th style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: rgba(194,194,194,0.5); text-align: left; padding: 0 10px 10px; border-bottom: 1px solid rgba(255,255,255,0.08);">PID</th>
+              <th style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: rgba(194,194,194,0.5); text-align: left; padding: 0 10px 10px; border-bottom: 1px solid rgba(255,255,255,0.08);">Name</th>
+              <th style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: rgba(194,194,194,0.5); text-align: left; padding: 0 10px 10px; border-bottom: 1px solid rgba(255,255,255,0.08);">Memory</th>
+              <th style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: rgba(194,194,194,0.5); text-align: left; padding: 0 10px 10px; border-bottom: 1px solid rgba(255,255,255,0.08);">Reductions</th>
+              <th style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: rgba(194,194,194,0.5); text-align: left; padding: 0 10px 10px; border-bottom: 1px solid rgba(255,255,255,0.08);">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {%for {p, p_info} <- @system_metrics.processes}
+              <tr class="hd-proc-row">
+                <td style="padding: 9px 10px; border-bottom: 1px solid rgba(255,255,255,0.04); font-family: ui-monospace, monospace; font-size: 11px; color: #a78bfa;">{inspect(p)}</td>
+                <td style="padding: 9px 10px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 13px; color: #c2c2c2;">{p_info[:registered_name]}</td>
+                <td style="padding: 9px 10px; border-bottom: 1px solid rgba(255,255,255,0.04);">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-family: ui-monospace, monospace; font-size: 12px; color: #c2c2c2;">{format_bytes(p_info[:total_heap_size])}</span>
+                  </div>
+                </td>
+                <td style="padding: 9px 10px; border-bottom: 1px solid rgba(255,255,255,0.04); font-family: ui-monospace, monospace; font-size: 11px; color: rgba(194,194,194,0.5);">{format_integer(p_info[:reductions])}</td>
+                <td style="padding: 9px 10px; border-bottom: 1px solid rgba(255,255,255,0.04);"><span style="font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; background: rgba(167,139,250,0.12); color: #a78bfa;">{p_info[:status]}</span></td>
+              </tr>
+            {/for}
+          </tbody>
+        </table>
+        <div style="text-align: center; padding-top: 12px; font-size: 11px; color: rgba(194,194,194,0.5);">Showing top {length(@system_metrics.processes)} of {format_integer(@system_metrics.process_count)} processes</div>
+      </div>
+    </div>
+
+    <!-- Log Stream -->
+    <div style="background: #1a1b21; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 20px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px;">
+        <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(194,194,194,0.5);">Log Stream</span>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <!-- <button class="hd-pause-btn">
+            <svg width="9" height="11" viewBox="0 0 9 11" fill="currentColor"><rect x="0" y="0" width="3" height="11" rx="1"/><rect x="6" y="0" width="3" height="11" rx="1"/></svg>
+            pause
+          </button> -->
+          <span style="display: flex; align-items: center; gap: 5px; font-size: 11px; color: #4ade80; font-weight: 500;"><div class="hd-live-dot"></div> live</span>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; font-family: ui-monospace, monospace; font-size: 12px;">
+        {%for log <- @log_msgs}
+          <div class="hd-log-row" style="display: grid; grid-template-columns: auto auto auto 1fr; gap: 10px; align-items: baseline; padding: 7px 4px; border-bottom: 1px solid rgba(255,255,255,0.04); border-radius: 4px;">
+            <span style="font-size: 10px; font-weight: 700; padding: 1px 4px; border-radius: 3px; text-align: center; background: {log_level_background_colour(log)}; color: {log_level_text_colour(log)}; align-self: center;">{log_level(log)}</span>
+            <span style="color: rgba(194,194,194,0.5);">{format_time(log.meta.time)}</span>
+            <span style="color: #a78bfa;">[{log_module(log)}]</span>
+            <span style="color: #c2c2c2; word-break: break-word;">{log.msg}</span>
+          </div>
+        {/for}
+      </div>
+    </div>
+
+  </div>
+</div>
