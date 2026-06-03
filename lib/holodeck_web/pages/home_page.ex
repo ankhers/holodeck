@@ -2,6 +2,7 @@ defmodule HolodeckWeb.HomePage do
   use HolodeckWeb, :page
 
   alias Hologram.UI.Link
+  alias HolodeckWeb.Components.Card
 
   route "/"
 
@@ -29,26 +30,12 @@ defmodule HolodeckWeb.HomePage do
           <p class="text-sm text-base-content/50 max-w-[400px] mx-auto leading-relaxed">A showcase app demonstrating the Hologram framework running in different contexts.</p>
         </div>
 
-        <div class="grid grid-cols-2 gap-3 max-w-[640px] mx-auto">
+        <div class="grid grid-cols-3 gap-3 max-w-[960px] mx-auto">
+          <Card icon="hero-chat-bubble-left" title="Chat" body="Real-time messaging with rooms." link_page={HolodeckWeb.Chat.LobbyPage} />
 
-          <Link to={HolodeckWeb.Chat.LobbyPage} class="block bg-base-200 border border-white/[0.08] rounded-xl p-6 no-underline text-base-content transition-colors hover:border-white/20">
-            <div class="w-9 h-9 rounded-lg bg-primary/[0.12] border border-primary/20 flex items-center justify-center mb-4">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-            </div>
-            <div class="text-[15px] font-semibold text-base-content mb-1.5">Chat</div>
-            <div class="text-xs text-base-content/45 leading-relaxed">Real-time messaging with rooms.</div>
-            <div class="mt-4 text-[11px] font-semibold uppercase tracking-[0.08em] text-primary">Open →</div>
-          </Link>
+          <Card icon="hero-squares-2x2" title="Dashboard" body="Live system metrics, process info, and log streaming." link_page={HolodeckWeb.Dashboard.DashboardPage} />
 
-          <Link to={HolodeckWeb.Dashboard.DashboardPage} class="block bg-base-200 border border-white/[0.08] rounded-xl p-6 no-underline text-base-content transition-colors hover:border-white/20">
-            <div class="w-9 h-9 rounded-lg bg-primary/[0.12] border border-primary/20 flex items-center justify-center mb-4">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-            </div>
-            <div class="text-[15px] font-semibold text-base-content mb-1.5">Dashboard</div>
-            <div class="text-xs text-base-content/45 leading-relaxed">Live system metrics, process info, and log streaming.</div>
-            <div class="mt-4 text-[11px] font-semibold uppercase tracking-[0.08em] text-primary">Open →</div>
-          </Link>
-
+          <Card icon="hero-chart-bar" title="Polls" body="Live voting with real-time results, using Chart.js for visualizations." link_page={HolodeckWeb.Poll.PollPage} />
         </div>
 
       </div>

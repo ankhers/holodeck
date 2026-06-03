@@ -31,6 +31,12 @@ defmodule HolodeckWeb do
     end
   end
 
+  def component do
+    quote do
+      use Hologram.Component
+    end
+  end
+
   def router do
     quote do
       use Phoenix.Router, helpers: false
