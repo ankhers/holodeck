@@ -57,6 +57,39 @@
 }
 
 @plugin "../vendor/daisyui-theme" {
+  name: "holodeck";
+  default: false;
+  prefersdark: false;
+  color-scheme: "dark";
+  --color-base-100: oklch(8.5% 0.016 265);
+  --color-base-200: oklch(13.5% 0.016 265);
+  --color-base-300: oklch(10% 0.016 265);
+  --color-base-content: oklch(96% 0 0);
+  --color-primary: oklch(72% 0.18 293);
+  --color-primary-content: oklch(8.5% 0.016 265);
+  --color-secondary: oklch(82% 0.14 293);
+  --color-secondary-content: oklch(8.5% 0.016 265);
+  --color-accent: oklch(50% 0.27 293);
+  --color-accent-content: oklch(96% 0 0);
+  --color-neutral: oklch(25% 0.016 265);
+  --color-neutral-content: oklch(96% 0 0);
+  --color-info: oklch(62% 0.214 259.815);
+  --color-info-content: oklch(97% 0.013 236.62);
+  --color-success: oklch(78% 0.2 154);
+  --color-success-content: oklch(8.5% 0.016 265);
+  --color-warning: oklch(66% 0.179 58.318);
+  --color-warning-content: oklch(98% 0.022 95.277);
+  --color-error: oklch(58% 0.253 17.585);
+  --color-error-content: oklch(96% 0.015 12.422);
+  --radius-selector: 0.25rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.5rem;
+  --border: 1.5px;
+  --depth: 1;
+  --noise: 0;
+}
+
+@plugin "../vendor/daisyui-theme" {
   name: "light";
   default: true;
   prefersdark: false;
@@ -116,3 +149,6 @@
 @keyframes hd-pulse { 0%,100%{opacity:1} 50%{opacity:0.25} }
 .hd-log-row:hover { background: rgba(255,255,255,0.03); padding: 7px 8px; margin: 0 -4px; }
 .hd-proc-row:hover td { background: rgba(255,255,255,0.03); }
+.hd-grain { background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E"); background-size: 256px 256px; }
+.hd-glow { background: radial-gradient(ellipse, rgba(167,139,250,0.1) 0%, transparent 70%); }
+.hd-logo-icon { background: linear-gradient(135deg, #7c3aed, #a78bfa); box-shadow: 0 0 14px rgba(167,139,250,0.45), 0 0 0 1px rgba(167,139,250,0.2); }

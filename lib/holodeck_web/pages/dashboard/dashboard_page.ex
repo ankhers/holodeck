@@ -133,9 +133,11 @@ defmodule HolodeckWeb.Dashboard.DashboardPage do
 
   def log_level_text_colour(%{level: :warning}), do: "#fbbf24"
   def log_level_text_colour(%{level: :error}), do: "#f87171"
+  def log_level_text_colour(%{level: :debug}), do: "#9ca3af"
   def log_level_text_colour(_log), do: "#60a5fa"
 
   def log_level_background_colour(%{level: :warning}), do: "rgba(251,191,36,0.1)"
   def log_level_background_colour(%{level: :error}), do: "rgba(248,113,113,0.1)"
+  def log_level_background_colour(%{level: :debug}), do: "rgba(156,163,175,0.1)"
   def log_level_background_colour(_log), do: "rgba(96,165,250,0.1)"
 end
