@@ -20,9 +20,12 @@ defmodule HolodeckWeb.Poll.PollPage do
       {:ok, poll} ->
         put_action(server, :poll_created, %{poll: poll})
 
-      {:error, reason} ->
-        # TODO: Show error flash
-        server
+      {:error, _reason} ->
+        put_action(server,
+          name: :show,
+          target: "toast",
+          params: %{message: "All fields are required", variant: :error}
+        )
     end
   end
 end

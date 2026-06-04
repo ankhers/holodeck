@@ -38,13 +38,27 @@ defmodule HolodeckWeb.Chat.LobbyPage do
       {:ok, room} ->
         put_action(server, :room_created, room: room)
 
-      {:error, reason} ->
-        # TODO: Show a toast of the reason
-        server
+      {:error, changeset} ->
+        put_action(server,
+          name: :show,
+          target: "toast",
+          params: %{message: changeset_error_message(changeset), variant: :error}
+        )
     end
   end
 
   def command(:save_username, params, server) do
     put_session(server, "holodeck_chat_username", params.username)
+  end
+
+  defp changeset_error_message(changeset) do
+    changeset
+    |> Ecto.Changeset.traverse_errors(fn {msg, opts} ->
+      Enum.reduce(opts, msg, fn {key, value}, acc ->
+        String.replace(acc, "%{#{key}}", to_string(value))
+      end)
+    end)
+    |> Enum.flat_map(fn {_field, errors} -> errors end)
+    |> Enum.join(", ")
   end
 end

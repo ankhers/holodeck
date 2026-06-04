@@ -21,11 +21,11 @@ defmodule Holodeck.Chat.Room do
 
   def validate_name(changeset) do
     changeset
-    |> validate_required(:name)
+    |> validate_required(:name, message: "Room name can't be blank")
     |> validate_length(:name, min: 3)
   end
 
   def validate_creator(changeset) do
-    validate_required(changeset, :creator)
+    validate_required(changeset, :creator, message: "Username can't be blank")
   end
 end

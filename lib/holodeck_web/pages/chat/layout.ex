@@ -14,6 +14,7 @@ defmodule HolodeckWeb.Chat.Layout do
       </head>
       <body class="m-0 p-0 bg-base-100">
         <slot />
+        <HolodeckWeb.Components.Toast cid="toast" />
       </body>
     </html>
     """
