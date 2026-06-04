@@ -11,11 +11,14 @@ defmodule HolodeckWeb.Poll.PollPage do
     put_command(component, :create_poll, params)
   end
 
+  def action(:poll_created, params, component) do
+    put_page(component, HolodeckWeb.Poll.ResultPage, poll_id: params.poll.id)
+  end
+
   def command(:create_poll, params, server) do
     case Polls.create_poll(params.event) do
       {:ok, poll} ->
-        # TODO: Move to answer page
-        server
+        put_action(server, :poll_created, %{poll: poll})
 
       {:error, reason} ->
         # TODO: Show error flash
