@@ -56,8 +56,16 @@ defmodule HolodeckWeb.Dashboard.DashboardPage do
     |> put_action(name: :tick, delay: @tick_delay)
   end
 
+  def action(:store_metrics, system_metrics, component) do
+    put_state(component, system_metrics: system_metrics)
+  end
+
   def command(:process_sort, params, server) do
-    put_session(server, "holodeck_dashboard_process_sort", params.order)
+    system_metrics = Dashboard.system_metrics(process_sort: params.order)
+
+    server
+    |> put_session("holodeck_dashboard_process_sort", params.order)
+    |> put_action(:store_metrics, system_metrics)
   end
 
   def command(:tick, _params, server) do
