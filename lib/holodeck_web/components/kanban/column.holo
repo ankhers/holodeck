@@ -1,0 +1,8 @@
+<section id={"kanban-column-" <> @column} data-column={@column} class="kanban-column rounded-xl border border-white/10 bg-white/[0.02] p-3 min-h-48" aria-label={@label}>
+  <h2 class="text-xs font-semibold uppercase tracking-wider text-base-content/60 px-1 py-2 mb-2">{@label} <span class="text-base-content/30 ml-1">{length(@cards)}</span></h2>
+  <div class="flex flex-col gap-3">
+    {%for card <- @cards}
+      <HolodeckWeb.Components.Kanban.Card cid={"kanban-card-" <> card.id} card={card} column_cid={"kanban-column-" <> @column} disabled={@disabled} />
+    {/for}
+  </div>
+</section>

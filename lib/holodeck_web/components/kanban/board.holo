@@ -1,0 +1,38 @@
+<div id="kanban-board-root" class="kanban-board" aria-busy={@busy != nil}>
+  <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight">Shared Kanban</h1>
+      <p class="text-sm text-base-content/50 mt-2">One public board. Anyone can edit. Open another browser and move together.</p>
+      <p class="text-xs font-mono text-base-content/40 mt-2">Revision {@confirmed.revision} · {length(@confirmed.cards)}/30 cards · Moves append to a column</p>
+    </div>
+    <div class="flex gap-2">
+      <button id="kanban-sync" type="button" $click="sync" class="kanban-button">Sync board</button>
+      <button id="kanban-reset" type="button" $click="confirm_reset" disabled={@busy != nil} class="kanban-button">Reset demo</button>
+    </div>
+  </div>
+
+  {%if @reset_confirmation != nil}
+    <div id="kanban-reset-confirmation" class="rounded-lg border border-warning/30 bg-warning/5 p-4 mb-4 text-sm">
+      <p>Reset public revision {@reset_confirmation}? This replaces everyone’s cards. Resets have a global 60-second cooldown.</p>
+      <div class="flex gap-2 mt-3">
+        <button id="kanban-reset-confirm" type="button" $click="reset_board" disabled={@busy != nil} class="kanban-button">Yes, reset everyone’s board</button>
+        <button type="button" $click="cancel_reset" class="kanban-button">Cancel</button>
+      </div>
+    </div>
+  {/if}
+
+  <form id="kanban-add" $submit="add_card" class="flex flex-wrap gap-2 mb-3">
+    <label for="kanban-title" class="sr-only">New card title</label>
+    <input id="kanban-title" name="title" value={@draft_title} $change="update_draft" maxlength="120" required disabled={@busy != nil} placeholder="What’s next? Add a card to To do…" class="flex-1 min-w-48 bg-base-100 border border-white/15 rounded-md px-3 py-2 text-sm outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 disabled:opacity-50" />
+    <button id="kanban-add-button" type="submit" disabled={@busy != nil or length(@confirmed.cards) >= 30} class="kanban-button kanban-button-primary">Add card</button>
+  </form>
+  <div id="kanban-status" role="status" aria-live="polite" aria-atomic="true" class="min-h-8 text-xs text-base-content/60 mb-3">
+    {%if @error != ""}{@error}{%else}{@status}{/if}
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+    {%for {column, label} <- [{"todo", "To do"}, {"doing", "In progress"}, {"done", "Done"}]}
+      <HolodeckWeb.Components.Kanban.Column cid={"kanban-column-" <> column} column={column} label={label} cards={Enum.filter(display_cards(@confirmed, @pending), &(&1.column == column))} disabled={@busy != nil} />
+    {/for}
+  </div>
+</div>
