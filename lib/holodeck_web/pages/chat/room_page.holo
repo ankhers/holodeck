@@ -23,9 +23,9 @@
         <form id="message-form" $submit="send_message" class="w-full max-w-3xl mx-auto px-4 py-3 flex items-end gap-2">
           <div class="flex-1 min-w-0">
             <label for="chat-message" class="sr-only">Message</label>
-            <input id="chat-message" type="text" name="message" value={@draft} $change="update_draft" placeholder="Type a message..." autocomplete="off" class="w-full bg-base-100 border border-white/15 rounded-md px-3 py-2 text-[13px] font-mono text-base-content placeholder:text-base-content/30 outline-none transition-colors focus:border-primary/60 focus:ring-2 focus:ring-primary/20" />
+            <input id="chat-message" type="text" name="message" value={@draft} $change="update_draft" placeholder="Type a message..." autocomplete="off" class="hd-input" />
           </div>
-          <button id="send-message" type="submit" class="bg-primary text-primary-content rounded-md px-3.5 py-2 text-[13px] font-semibold font-mono cursor-pointer transition hover:brightness-110 active:translate-y-px disabled:opacity-50 disabled:cursor-not-allowed">Send</button>
+          <button id="send-message" type="submit" class="hd-btn hd-btn-primary">Send</button>
         </form>
       </div>
     {%else}

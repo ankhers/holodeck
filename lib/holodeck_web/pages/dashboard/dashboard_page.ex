@@ -137,9 +137,9 @@ defmodule HolodeckWeb.Dashboard.DashboardPage do
   def metrics_dot_class(:live), do: "hd-live-dot"
   def metrics_dot_class(:stale), do: "hd-live-dot hd-live-dot-stale"
 
-  def bar_colour(percent) when percent >= 80, do: "#f87171"
-  def bar_colour(percent) when percent >= 60, do: "#fbbf24"
-  def bar_colour(_percent), do: "#60a5fa"
+  def bar_class(percent) when percent >= 80, do: "bg-error"
+  def bar_class(percent) when percent >= 60, do: "bg-warning"
+  def bar_class(_percent), do: "bg-info"
 
   def format_percent(f), do: :erlang.float_to_binary(f / 1, decimals: 2)
 
@@ -189,13 +189,11 @@ defmodule HolodeckWeb.Dashboard.DashboardPage do
   def format_time(timestamp),
     do: timestamp |> DateTime.from_unix!(:microsecond) |> Calendar.strftime("%H:%M:%S")
 
-  def log_level_text_colour(%{level: :warning}), do: "#fbbf24"
-  def log_level_text_colour(%{level: :error}), do: "#f87171"
-  def log_level_text_colour(%{level: :debug}), do: "#9ca3af"
-  def log_level_text_colour(_log), do: "#60a5fa"
+  def log_level_class(%{level: :warning}), do: "bg-warning/10 text-warning"
 
-  def log_level_background_colour(%{level: :warning}), do: "rgba(251,191,36,0.1)"
-  def log_level_background_colour(%{level: :error}), do: "rgba(248,113,113,0.1)"
-  def log_level_background_colour(%{level: :debug}), do: "rgba(156,163,175,0.1)"
-  def log_level_background_colour(_log), do: "rgba(96,165,250,0.1)"
+  def log_level_class(%{level: level}) when level in [:error, :critical, :alert, :emergency],
+    do: "bg-error/10 text-error"
+
+  def log_level_class(%{level: :debug}), do: "bg-base-content/10 text-base-content/60"
+  def log_level_class(_log), do: "bg-info/10 text-info"
 end

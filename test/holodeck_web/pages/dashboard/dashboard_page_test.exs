@@ -146,6 +146,15 @@ defmodule HolodeckWeb.Dashboard.DashboardPageTest do
     assert DashboardPage.metrics_dot_class(:stale) == "hd-live-dot hd-live-dot-stale"
   end
 
+  test "bars and log levels use theme colours" do
+    assert DashboardPage.bar_class(85.0) == "bg-error"
+    assert DashboardPage.bar_class(60) == "bg-warning"
+    assert DashboardPage.bar_class(12.5) == "bg-info"
+    assert DashboardPage.log_level_class(%{level: :critical}) =~ "text-error"
+    assert DashboardPage.log_level_class(%{level: :warning}) =~ "text-warning"
+    assert DashboardPage.log_level_class(%{level: :info}) =~ "text-info"
+  end
+
   defp sort_values do
     [
       {:memory, :memory},

@@ -1,40 +1,44 @@
 <HolodeckWeb.Components.AppShell breadcrumbs={ [{"Polls", nil}] }>
-  <div class="max-w-[560px] min-w-0 mx-auto space-y-8">
-    <section aria-labelledby="create-poll-heading">
-      <h1 id="create-poll-heading" class="text-base-content/50 text-[11px] uppercase tracking-[1px] mb-2.5 font-mono">Create Poll</h1>
-      <form id="create-poll-form" $submit="create_poll" class="bg-base-300 border border-white/20 rounded-lg p-4 flex flex-col gap-4">
-        <div>
-          <label for="poll-question" class="block text-[11px] uppercase tracking-[0.08em] font-mono text-base-content/50 mb-1.5">Question</label>
-          <input id="poll-question" type="text" name="question" required placeholder="Ask a question…" class="w-full bg-base-100 border border-white/15 rounded-md px-3 py-2 text-[13px] font-mono text-base-content placeholder:text-base-content/30 outline-none transition-colors focus:border-primary/60 focus:ring-2 focus:ring-primary/20" />
-        </div>
-        {%for n <- 1..4}
+  <div class="max-w-[560px] min-w-0 mx-auto">
+    <HolodeckWeb.Components.PageHeader kicker="JS interop · Chart.js" title="Polls" description="Ask a question, share the link, and watch the votes arrive in real time." />
+
+    <div class="space-y-8">
+      <section aria-labelledby="create-poll-heading">
+        <h2 id="create-poll-heading" class="text-base-content/50 text-[11px] uppercase tracking-[0.08em] mb-2.5 font-mono">Create poll</h2>
+        <form id="create-poll-form" $submit="create_poll" class="bg-base-300 border border-white/20 rounded-lg p-4 flex flex-col gap-4">
           <div>
-            <label for="poll-answer-{n}" class="block text-[11px] uppercase tracking-[0.08em] font-mono text-base-content/50 mb-1.5">Option {n}</label>
-            <input id="poll-answer-{n}" type="text" name="answer_{n}" required autocomplete="off" placeholder="Option {n}" class="w-full bg-base-100 border border-white/15 rounded-md px-3 py-2 text-[13px] font-mono text-base-content placeholder:text-base-content/30 outline-none transition-colors focus:border-primary/60 focus:ring-2 focus:ring-primary/20" />
+            <label for="poll-question" class="block text-[11px] uppercase tracking-[0.08em] font-mono text-base-content/50 mb-1.5">Question</label>
+            <input id="poll-question" type="text" name="question" required placeholder="Ask a question…" class="hd-input" />
           </div>
-        {/for}
-        <div class="flex justify-end">
-          <button id="create-poll" type="submit" class="bg-primary text-primary-content rounded-md px-3.5 py-2 text-[13px] font-semibold font-mono cursor-pointer transition hover:brightness-110 active:translate-y-px disabled:opacity-50 disabled:cursor-not-allowed">Create poll</button>
-        </div>
-      </form>
-    </section>
-    <section aria-labelledby="recent-polls-heading">
-      <h2 id="recent-polls-heading" class="text-base-content/50 text-[11px] uppercase tracking-[1px] mb-2.5 font-mono">Recent polls</h2>
-      <div id="recent-polls" class="divide-y divide-white/10 border border-white/15 rounded-lg">
-        {%if @recent_polls == []}
-          <p class="p-4 text-[13px] text-base-content/50">No polls yet. Start the conversation above.</p>
-        {/if}
-        {%for entry <- @recent_polls}
-          <article class="p-4 min-w-0">
-            <h3 class="text-[13px] font-semibold break-words">{entry.poll.question}</h3>
-            <div class="flex flex-wrap items-center gap-3 mt-3 text-[12px] font-mono">
-              <span class="text-base-content/50">{entry.vote_count} {if entry.vote_count == 1 do "vote" else "votes" end}</span>
-              <Hologram.UI.Link to={HolodeckWeb.Poll.ResultPage, poll_id: entry.poll.id} class="text-primary hover:underline">Results</Hologram.UI.Link>
-              <Hologram.UI.Link to={HolodeckWeb.Poll.VotePage, poll_id: entry.poll.id} class="text-primary hover:underline">Vote</Hologram.UI.Link>
+          {%for n <- 1..4}
+            <div>
+              <label for="poll-answer-{n}" class="block text-[11px] uppercase tracking-[0.08em] font-mono text-base-content/50 mb-1.5">Option {n}</label>
+              <input id="poll-answer-{n}" type="text" name="answer_{n}" required autocomplete="off" placeholder="Option {n}" class="hd-input" />
             </div>
-          </article>
-        {/for}
-      </div>
-    </section>
+          {/for}
+          <div class="flex justify-end">
+            <button id="create-poll" type="submit" class="hd-btn hd-btn-primary">Create poll</button>
+          </div>
+        </form>
+      </section>
+      <section aria-labelledby="recent-polls-heading">
+        <h2 id="recent-polls-heading" class="text-base-content/50 text-[11px] uppercase tracking-[0.08em] mb-2.5 font-mono">Recent polls</h2>
+        <div id="recent-polls" class="divide-y divide-white/10 border border-white/15 rounded-lg">
+          {%if @recent_polls == []}
+            <p class="p-4 text-[13px] text-base-content/50">No polls yet. Start the conversation above.</p>
+          {/if}
+          {%for entry <- @recent_polls}
+            <article class="p-4 min-w-0">
+              <h3 class="text-[13px] font-semibold break-words">{entry.poll.question}</h3>
+              <div class="flex flex-wrap items-center gap-3 mt-3 text-[12px] font-mono">
+                <span class="text-base-content/50">{entry.vote_count} {if entry.vote_count == 1 do "vote" else "votes" end}</span>
+                <Hologram.UI.Link to={HolodeckWeb.Poll.ResultPage, poll_id: entry.poll.id} class="text-primary hover:underline">Results</Hologram.UI.Link>
+                <Hologram.UI.Link to={HolodeckWeb.Poll.VotePage, poll_id: entry.poll.id} class="text-primary hover:underline">Vote</Hologram.UI.Link>
+              </div>
+            </article>
+          {/for}
+        </div>
+      </section>
+    </div>
   </div>
 </HolodeckWeb.Components.AppShell>

@@ -1,35 +1,30 @@
 <HolodeckWeb.Components.AppShell breadcrumbs={[{"Game of Life", nil}]}>
-  <header class="mb-6 flex flex-wrap items-end justify-between gap-4">
-    <div>
-      <p class="text-primary text-[11px] font-mono uppercase tracking-[0.15em] mb-2">Client-side playground</p>
-      <h1 class="text-3xl font-semibold tracking-tight mb-2">Game of Life</h1>
-      <p class="text-base-content/50 text-sm">Simple rules. Emergent worlds. Entirely Elixir.</p>
-    </div>
+  <HolodeckWeb.Components.PageHeader kicker="Client-side Elixir · delayed actions" title="Game of Life" description="Simple rules. Emergent worlds. Entirely Elixir.">
     <span class="border border-primary/25 bg-primary/5 rounded-full px-3 py-1.5 text-primary text-[11px] font-mono">Elixir running in your browser</span>
-  </header>
+  </HolodeckWeb.Components.PageHeader>
 
   <div class="hd-life-layout">
     <aside class="flex flex-col gap-3 min-w-0">
       <section class="hd-life-panel p-5">
         <h2 class="hd-life-label mb-4">Take control</h2>
         <div class="flex flex-wrap items-center gap-2 mb-5">
-          <button id="life-play" type="button" class="bg-primary text-primary-content rounded-md px-3.5 py-2 text-[13px] font-semibold font-mono cursor-pointer transition hover:brightness-110 active:translate-y-px disabled:opacity-50 disabled:cursor-not-allowed" $click={if(@running, do: :pause, else: :play)}>{if(@running, do: "Pause", else: "Play")}</button>
-          <button id="life-step" type="button" disabled={@running} class="bg-primary text-primary-content rounded-md px-3.5 py-2 text-[13px] font-semibold font-mono cursor-pointer transition hover:brightness-110 active:translate-y-px disabled:opacity-50 disabled:cursor-not-allowed" $click="step">Step</button>
+          <button id="life-play" type="button" class="hd-btn hd-btn-primary min-w-[76px]" $click={if(@running, do: :pause, else: :play)}>{if(@running, do: "Pause", else: "Play")}</button>
+          <button id="life-step" type="button" disabled={@running} class="hd-btn py-2 text-[13px]" $click="step">Step</button>
         </div>
         <label for="life-speed" class="hd-life-label block mb-2">Tick interval</label>
-        <select id="life-speed" class="hd-life-speed w-full mb-5" $change="speed">
+        <select id="life-speed" class="hd-input mb-5 cursor-pointer" $change="speed">
           {%for delay <- speeds()}
             <option value={delay} selected={delay == @delay_ms}>{delay} ms</option>
           {/for}
         </select>
         <div class="flex flex-wrap gap-2">
-          <button id="life-clear" type="button" class="border border-white/15 text-base-content/75 rounded-md px-3 py-1.5 text-[12px] font-mono cursor-pointer transition-colors hover:border-primary/50 hover:text-base-content" $click="clear">Clear</button>
-          <button id="life-randomise" type="button" class="border border-white/15 text-base-content/75 rounded-md px-3 py-1.5 text-[12px] font-mono cursor-pointer transition-colors hover:border-primary/50 hover:text-base-content" $click="randomise">Randomise</button>
+          <button id="life-clear" type="button" class="hd-btn" $click="clear">Clear</button>
+          <button id="life-randomise" type="button" class="hd-btn" $click="randomise">Randomise</button>
         </div>
         <h2 class="hd-life-label mt-6 mb-3">Seed a pattern</h2>
         <div class="flex flex-wrap gap-2">
           {%for name <- Life.presets()}
-            <button id={"life-preset-#{name}"} type="button" class="border border-white/15 text-base-content/75 rounded-md px-3 py-1.5 text-[12px] font-mono cursor-pointer transition-colors hover:border-primary/50 hover:text-base-content" $click={:preset, name: name}>{String.capitalize(Atom.to_string(name))}</button>
+            <button id={"life-preset-#{name}"} type="button" class="hd-btn" $click={:preset, name: name}>{String.capitalize(Atom.to_string(name))}</button>
           {/for}
         </div>
         <p class="mt-4 text-xs leading-relaxed text-base-content/50">Click any cell to shape the world, even while it’s playing. Seeds reset the generation and pause the simulation.</p>

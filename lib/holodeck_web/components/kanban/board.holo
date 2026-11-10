@@ -1,31 +1,25 @@
 <div id="kanban-board-root" class="hd-kanban-board" aria-busy={if(@busy != nil, do: "true", else: "false")}>
-  <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
-    <div>
-      <h1 class="text-base-content/50 text-[11px] uppercase tracking-[1px] mb-2.5 font-mono">Shared Kanban</h1>
-      <p class="text-sm text-base-content/50 mt-2">One public board. Anyone can edit. Open another browser and move together.</p>
-      <p class="text-xs font-mono text-base-content/40 mt-2">Revision {@confirmed.revision} · {length(@confirmed.cards)}/30 cards · Moves append to a column</p>
-    </div>
-    <div class="flex gap-2">
-      <button id="kanban-sync" type="button" $click="sync" class="hd-kanban-button">Sync board</button>
-      <button id="kanban-reset" type="button" $click="confirm_reset" disabled={@busy != nil} class="hd-kanban-button">Reset demo</button>
-    </div>
-  </div>
+  <HolodeckWeb.Components.PageHeader kicker="Nested components · targeted actions" title="Shared Kanban" description="One public board. Anyone can edit. Open another browser and move together.">
+    <button id="kanban-sync" type="button" $click="sync" class="hd-btn">Sync board</button>
+    <button id="kanban-reset" type="button" $click="confirm_reset" disabled={@busy != nil} class="hd-btn">Reset demo</button>
+  </HolodeckWeb.Components.PageHeader>
 
   {%if @reset_confirmation != nil}
     <div id="kanban-reset-confirmation" class="rounded-lg border border-warning/30 bg-warning/5 p-4 mb-4 text-sm">
       <p>Reset public revision {@reset_confirmation}? This replaces everyone’s cards. Resets have a global 60-second cooldown.</p>
       <div class="flex gap-2 mt-3">
-        <button id="kanban-reset-confirm" type="button" $click="reset_board" disabled={@busy != nil} class="hd-kanban-button">Yes, reset everyone’s board</button>
-        <button id="kanban-reset-cancel" type="button" $click="cancel_reset" class="hd-kanban-button">Cancel</button>
+        <button id="kanban-reset-confirm" type="button" $click="reset_board" disabled={@busy != nil} class="hd-btn">Yes, reset everyone’s board</button>
+        <button id="kanban-reset-cancel" type="button" $click="cancel_reset" class="hd-btn">Cancel</button>
       </div>
     </div>
   {/if}
 
-  <form id="kanban-add" $submit="add_card" class="flex flex-wrap gap-2 mb-3">
+  <form id="kanban-add" $submit="add_card" class="flex flex-wrap gap-2 mb-2">
     <label for="kanban-title" class="sr-only">New card title</label>
-    <input id="kanban-title" name="title" value={@draft_title} $change="update_draft" maxlength="120" required disabled={@busy != nil} placeholder="What’s next? Add a card to To do…" class="flex-1 min-w-48 bg-base-100 border border-white/15 rounded-md px-3 py-2 text-sm outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 disabled:opacity-50" />
-    <button id="kanban-add-button" type="submit" disabled={@busy != nil or length(@confirmed.cards) >= 30} class="hd-kanban-button hd-kanban-button-primary">Add card</button>
+    <input id="kanban-title" name="title" value={@draft_title} $change="update_draft" maxlength="120" required disabled={@busy != nil} placeholder="What’s next? Add a card to To do…" class="hd-input flex-1 w-auto min-w-48" />
+    <button id="kanban-add-button" type="submit" disabled={@busy != nil or length(@confirmed.cards) >= 30} class="hd-btn hd-btn-primary">Add card</button>
   </form>
+  <p id="kanban-meta" class="text-xs font-mono text-base-content/40 mb-1">Revision {@confirmed.revision} · {length(@confirmed.cards)}/30 cards · Moves append to a column</p>
   <div id="kanban-status" role="status" aria-live="polite" aria-atomic="true" class="min-h-8 text-xs text-base-content/60 mb-3">
     {%if @error != ""}{@error}{%else}{@status}{/if}
   </div>

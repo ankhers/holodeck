@@ -1,4 +1,5 @@
 <HolodeckWeb.Components.AppShell breadcrumbs={[{"Dashboard", nil}]}>
+  <HolodeckWeb.Components.PageHeader kicker="Server ticks · log streaming" title="Dashboard" description="Live metrics, processes and logs from the BEAM node serving this page." />
 
   <div id="dashboard-panels" class="grid grid-cols-1 lg:grid-cols-[355px_minmax(0,1fr)] gap-3 mb-3">
 
@@ -15,12 +16,12 @@
           <span class="text-[10px] font-semibold uppercase tracking-[0.07em] text-base-content/50">CPU · overall</span>
           <span class="text-[11px] text-base-content/75 font-mono">{format_percent(@system_metrics.cpu_average)}%</span>
         </div>
-        <div class="h-[5px] rounded-full bg-white/[0.06] overflow-hidden mb-3"><div style={"height: 100%; border-radius: 99px; width: #{format_percent(@system_metrics.cpu_average)}%; background: #{bar_colour(@system_metrics.cpu_average)};"}></div></div>
+        <div class="h-[5px] rounded-full bg-white/[0.06] overflow-hidden mb-3"><div class={"h-full rounded-full transition-[width] duration-500 #{bar_class(@system_metrics.cpu_average)}"} style={"width: #{format_percent(@system_metrics.cpu_average)}%;"}></div></div>
         <div id="cpu-cores" aria-label="Per-core CPU usage" class="grid grid-cols-8 gap-2 max-h-[132px] overflow-y-auto pr-1">
           {%for {core, percent_used, _, _} <- @system_metrics.cpu}
             <div title={"Core #{core}: #{format_percent(percent_used)}%"}>
               <div class="text-[9px] text-base-content/50 font-mono mb-1">C{core}</div>
-              <div class="h-1 rounded-full bg-white/[0.06] overflow-hidden"><div style={"height: 100%; width: #{format_percent(percent_used)}%; background: #{bar_colour(percent_used)};"}></div></div>
+              <div class="h-1 rounded-full bg-white/[0.06] overflow-hidden"><div class={"h-full transition-[width] duration-500 #{bar_class(percent_used)}"} style={"width: #{format_percent(percent_used)}%;"}></div></div>
             </div>
           {/for}
         </div>
@@ -85,9 +86,9 @@
         <div class="flex items-center gap-3">
           <div class="flex items-center gap-[5px]">
             <span class="text-[10px] text-base-content/50">sort</span>
-            <button class={sort_button_class(@process_sort, :memory)} id="sort-memory" $click={:sort, by: :memory}>memory</button>
-            <button class={sort_button_class(@process_sort, :reductions)} id="sort-reductions" $click={:sort, by: :reductions}>reductions</button>
-            <button class={sort_button_class(@process_sort, :pid)} id="sort-pid" $click={:sort, by: :pid}>pid</button>
+            <button type="button" class={sort_button_class(@process_sort, :memory)} id="sort-memory" $click={:sort, by: :memory}>memory</button>
+            <button type="button" class={sort_button_class(@process_sort, :reductions)} id="sort-reductions" $click={:sort, by: :reductions}>reductions</button>
+            <button type="button" class={sort_button_class(@process_sort, :pid)} id="sort-pid" $click={:sort, by: :pid}>pid</button>
           </div>
           <span id="process-status" class={"flex items-center gap-[5px] text-[11px] font-medium #{metrics_status_class(@metrics_status)}"}><div class={metrics_dot_class(@metrics_status)}></div> {@metrics_status}</span>
         </div>
@@ -143,7 +144,7 @@
       <div class="hd-log-row text-[10px] uppercase tracking-wider text-base-content/50" aria-hidden="true"><span>Level</span><span>Time · UTC</span><span>Module</span><span>Message</span></div>
       {%for log <- @log_msgs}
         <div class="hd-log-row border-b border-white/[0.04] rounded">
-          <span class="text-[10px] font-bold px-1 py-px rounded-[3px] text-center" style={"background: #{log_level_background_colour(log)}; color: #{log_level_text_colour(log)};"}>{log_level(log)}</span>
+          <span class={"text-[10px] font-bold px-1 py-px rounded-[3px] text-center #{log_level_class(log)}"}>{log_level(log)}</span>
           <span class="text-base-content/50" title="UTC">{format_time(log.time)}</span>
           <span class="text-primary min-w-0 [overflow-wrap:anywhere]">[{log.module}]</span>
           <span class="text-base-content/75 min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]">{log.msg}</span>

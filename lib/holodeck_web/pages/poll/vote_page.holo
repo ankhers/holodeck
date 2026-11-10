@@ -3,7 +3,7 @@
   <div class="max-w-[480px] min-w-0 mx-auto">
 
     {%if @poll}
-      <div class="text-base-content/35 text-[11px] uppercase tracking-[1px] mb-2.5 font-mono">Cast Your Vote</div>
+      <HolodeckWeb.Components.PageHeader kicker="Commands · realtime broadcasts" title="Cast your vote" description="Pick one answer. The results page updates for everyone the moment you vote." />
 
       <div class="bg-base-300 border border-white/20 rounded-lg px-5 py-5 flex flex-col gap-5">
 
@@ -34,8 +34,8 @@
 
       </div>
     {%else}
-      <h1 class="text-[15px] font-semibold mb-3">Poll not found</h1>
-      <Hologram.UI.Link to={HolodeckWeb.Poll.PollPage} class="text-primary hover:underline">Create a poll</Hologram.UI.Link>
+      <HolodeckWeb.Components.PageHeader title="Poll not found" description="This link doesn't match a poll. It may have been mistyped." />
+      <Hologram.UI.Link to={HolodeckWeb.Poll.PollPage} class="hd-btn">Create a poll</Hologram.UI.Link>
     {/if}
 
   </div>

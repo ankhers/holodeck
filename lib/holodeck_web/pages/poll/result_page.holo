@@ -1,7 +1,7 @@
 <HolodeckWeb.Components.AppShell breadcrumbs={@breadcrumbs}>
   <div class="max-w-[560px] min-w-0 mx-auto">
     {%if @poll}
-      <h1 class="text-base-content/50 text-[11px] uppercase tracking-[1px] mb-2.5 font-mono">Poll Results</h1>
+      <HolodeckWeb.Components.PageHeader kicker="JS interop · Chart.js" title="Poll results" description="Votes stream in live and Chart.js redraws in place." />
       <div class="bg-base-300 border border-white/20 rounded-lg p-4 sm:p-5 flex flex-col gap-5 min-w-0">
         <h2 class="text-[15px] font-semibold text-base-content tracking-[-0.01em] break-words">{@poll.question}</h2>
         <div class="relative h-[240px] sm:h-[280px] min-w-0">
@@ -21,8 +21,8 @@
         <div class="border-t border-white/10 pt-4">
           <label for="poll-vote-url" class="block text-[11px] uppercase tracking-[0.08em] font-mono text-base-content/50 mb-1.5">Share this poll</label>
           <div class="flex flex-col sm:flex-row gap-2">
-            <input id="poll-vote-url" type="text" readonly value={@vote_url} class="w-full bg-base-100 border border-white/15 rounded-md px-3 py-2 text-[13px] font-mono text-base-content placeholder:text-base-content/30 outline-none transition-colors focus:border-primary/60 focus:ring-2 focus:ring-primary/20" />
-            <button id="copy-poll-link" $click="copy_link" class="border border-white/15 text-base-content/75 rounded-md px-3 py-1.5 text-[12px] font-mono cursor-pointer transition-colors hover:border-primary/50 hover:text-base-content shrink-0">Copy link</button>
+            <input id="poll-vote-url" type="text" readonly value={@vote_url} class="hd-input" />
+            <button id="copy-poll-link" type="button" $click="copy_link" class="hd-btn shrink-0">Copy link</button>
           </div>
         </div>
       </div>
@@ -36,8 +36,8 @@
         </p>
       {/if}
     {%else}
-      <h1 class="text-[15px] font-semibold mb-3">Poll not found</h1>
-      <Hologram.UI.Link to={HolodeckWeb.Poll.PollPage} class="text-primary hover:underline">Create a poll</Hologram.UI.Link>
+      <HolodeckWeb.Components.PageHeader title="Poll not found" description="This link doesn't match a poll. It may have been mistyped." />
+      <Hologram.UI.Link to={HolodeckWeb.Poll.PollPage} class="hd-btn">Create a poll</Hologram.UI.Link>
     {/if}
   </div>
 </HolodeckWeb.Components.AppShell>
