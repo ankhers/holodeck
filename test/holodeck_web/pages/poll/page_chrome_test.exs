@@ -1,5 +1,5 @@
 defmodule HolodeckWeb.Poll.PageChromeTest do
-  use Holodeck.DataCase, async: true
+  use Holodeck.DataCase, async: false
 
   alias Hologram.Component
   alias Hologram.Server
@@ -17,6 +17,36 @@ defmodule HolodeckWeb.Poll.PageChromeTest do
         assert component.state.breadcrumbs == [{"Polls", PollPage}, {"Poll not found", nil}]
       end
     end
+  end
+
+  test "results render frequencies immediately and remember this session's vote" do
+    Holodeck.HologramHelpers.ensure_pubsub_started()
+
+    {:ok, poll} =
+      Polls.create_poll(%{
+        question: "Ready?",
+        answer_1: "A",
+        answer_2: "B",
+        answer_3: "C",
+        answer_4: "D"
+      })
+
+    server = VotePage.command(:vote, %{poll_id: poll.id, answer_number: 2}, %Server{})
+    assert server.session["voted_poll_ids"] == [poll.id]
+
+    {results, _} = ResultPage.init(%{poll_id: poll.id}, %Component{}, server)
+    assert results.state.frequencies == %{2 => 1}
+    assert results.state.voted?
+    assert results.state.vote_url == "/poll/#{poll.id}/vote"
+
+    {visitor_results, _} = ResultPage.init(%{poll_id: poll.id}, %Component{}, %Server{})
+    refute visitor_results.state.voted?
+    assert length(PollPage.init(%{}, %Component{}, %Server{}).state.recent_polls) == 1
+  end
+
+  test "invalid votes do not mark the session as voted" do
+    server = VotePage.command(:vote, %{poll_id: "invalid", answer_number: 1}, %Server{})
+    refute Map.has_key?(server.session, "voted_poll_ids")
   end
 
   test "existing results and vote pages retain their section breadcrumbs" do

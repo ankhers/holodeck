@@ -37,7 +37,11 @@ defmodule HolodeckWeb.Poll.VotePage do
   def command(:vote, params, server) do
     case Polls.vote(params.poll_id, params.answer_number) do
       {:ok, _result} ->
-        put_action(server, :vote_complete)
+        voted_poll_ids = Enum.uniq([params.poll_id | get_session(server, :voted_poll_ids, [])])
+
+        server
+        |> put_session(:voted_poll_ids, voted_poll_ids)
+        |> put_action(:vote_complete)
 
       {:error, _reason} ->
         put_action(server,

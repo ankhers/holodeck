@@ -1,43 +1,40 @@
-<HolodeckWeb.Components.AppShell breadcrumbs={[{"Polls", nil}]}>
-
-  <div class="max-w-[480px] mx-auto">
-
-    <div class="text-base-content/35 text-[11px] uppercase tracking-[1px] mb-2.5 font-mono">Create Poll</div>
-
-    <form $submit="create_poll" class="bg-base-300 border border-white/20 rounded-lg px-4 py-4 flex flex-col gap-3">
-
-      <div class="flex items-center gap-2.5">
-        <span class="text-base-content/35 text-[11px] tracking-[1px] uppercase font-mono shrink-0 w-[68px]">Question</span>
-        <input type="text" name="question" class="flex-1 bg-transparent border-none outline-none text-base-content font-mono text-[13px]" />
+<HolodeckWeb.Components.AppShell breadcrumbs={ [{"Polls", nil}] }>
+  <div class="max-w-[560px] min-w-0 mx-auto space-y-8">
+    <section aria-labelledby="create-poll-heading">
+      <h1 id="create-poll-heading" class="text-base-content/50 text-[11px] uppercase tracking-[1px] mb-2.5 font-mono">Create Poll</h1>
+      <form id="create-poll-form" $submit="create_poll" class="bg-base-300 border border-white/20 rounded-lg p-4 flex flex-col gap-4">
+        <div>
+          <label for="poll-question" class="block text-[11px] uppercase tracking-[0.08em] font-mono text-base-content/50 mb-1.5">Question</label>
+          <input id="poll-question" type="text" name="question" required placeholder="Ask a question…" class="w-full bg-base-100 border border-white/15 rounded-md px-3 py-2 text-[13px] font-mono text-base-content placeholder:text-base-content/30 outline-none transition-colors focus:border-primary/60 focus:ring-2 focus:ring-primary/20" />
+        </div>
+        {%for n <- 1..4}
+          <div>
+            <label for="poll-answer-{n}" class="block text-[11px] uppercase tracking-[0.08em] font-mono text-base-content/50 mb-1.5">Option {n}</label>
+            <input id="poll-answer-{n}" type="text" name="answer_{n}" required autocomplete="off" placeholder="Option {n}" class="w-full bg-base-100 border border-white/15 rounded-md px-3 py-2 text-[13px] font-mono text-base-content placeholder:text-base-content/30 outline-none transition-colors focus:border-primary/60 focus:ring-2 focus:ring-primary/20" />
+          </div>
+        {/for}
+        <div class="flex justify-end">
+          <button id="create-poll" type="submit" class="bg-primary text-primary-content rounded-md px-3.5 py-2 text-[13px] font-semibold font-mono cursor-pointer transition hover:brightness-110 active:translate-y-px disabled:opacity-50 disabled:cursor-not-allowed">Create poll</button>
+        </div>
+      </form>
+    </section>
+    <section aria-labelledby="recent-polls-heading">
+      <h2 id="recent-polls-heading" class="text-base-content/50 text-[11px] uppercase tracking-[1px] mb-2.5 font-mono">Recent polls</h2>
+      <div id="recent-polls" class="divide-y divide-white/10 border border-white/15 rounded-lg">
+        {%if @recent_polls == []}
+          <p class="p-4 text-[13px] text-base-content/50">No polls yet. Start the conversation above.</p>
+        {/if}
+        {%for entry <- @recent_polls}
+          <article class="p-4 min-w-0">
+            <h3 class="text-[13px] font-semibold break-words">{entry.poll.question}</h3>
+            <div class="flex flex-wrap items-center gap-3 mt-3 text-[12px] font-mono">
+              <span class="text-base-content/50">{entry.vote_count} {if entry.vote_count == 1 do "vote" else "votes" end}</span>
+              <Hologram.UI.Link to={HolodeckWeb.Poll.ResultPage, poll_id: entry.poll.id} class="text-primary hover:underline">Results</Hologram.UI.Link>
+              <Hologram.UI.Link to={HolodeckWeb.Poll.VotePage, poll_id: entry.poll.id} class="text-primary hover:underline">Vote</Hologram.UI.Link>
+            </div>
+          </article>
+        {/for}
       </div>
-
-      <hr class="border-0 border-t border-white/[0.08]" />
-
-      <div class="flex items-center gap-2.5">
-        <span class="text-base-content/35 text-[11px] tracking-[1px] uppercase font-mono shrink-0 w-[68px]">Option 1</span>
-        <input type="text" name="answer_1" autocomplete="off" class="flex-1 bg-transparent border-none outline-none text-base-content font-mono text-[13px]" />
-      </div>
-
-      <div class="flex items-center gap-2.5">
-        <span class="text-base-content/35 text-[11px] tracking-[1px] uppercase font-mono shrink-0 w-[68px]">Option 2</span>
-        <input type="text" name="answer_2" autocomplete="off" class="flex-1 bg-transparent border-none outline-none text-base-content font-mono text-[13px]" />
-      </div>
-
-      <div class="flex items-center gap-2.5">
-        <span class="text-base-content/35 text-[11px] tracking-[1px] uppercase font-mono shrink-0 w-[68px]">Option 3</span>
-        <input type="text" name="answer_3" autocomplete="off" class="flex-1 bg-transparent border-none outline-none text-base-content font-mono text-[13px]" />
-      </div>
-
-      <div class="flex items-center gap-2.5">
-        <span class="text-base-content/35 text-[11px] tracking-[1px] uppercase font-mono shrink-0 w-[68px]">Option 4</span>
-        <input type="text" name="answer_4" autocomplete="off" class="flex-1 bg-transparent border-none outline-none text-base-content font-mono text-[13px]" />
-      </div>
-
-      <div class="flex justify-end pt-1">
-        <button type="submit" class="bg-primary text-primary-content border-none rounded px-3 py-1 font-semibold cursor-pointer font-mono">Create</button>
-      </div>
-
-    </form>
-
+    </section>
   </div>
 </HolodeckWeb.Components.AppShell>

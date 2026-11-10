@@ -7,6 +7,10 @@ defmodule HolodeckWeb.Poll.PollPage do
 
   layout HolodeckWeb.Layout, title: "Polls · Holodeck"
 
+  def init(_params, component, _server) do
+    put_state(component, recent_polls: Polls.recent_polls())
+  end
+
   def action(:create_poll, params, component) do
     put_command(component, :create_poll, params)
   end

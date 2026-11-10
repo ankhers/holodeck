@@ -23,7 +23,9 @@ defmodule HolodeckWeb.Poll.ResultPage do
         |> put_state(
           poll: poll,
           answers: answers,
-          frequencies: %{},
+          frequencies: Enum.frequencies_by(answers, & &1.answer_number),
+          voted?: poll.id in get_session(server, :voted_poll_ids, []),
+          vote_url: "/poll/#{poll.id}/vote",
           breadcrumbs: [{"Polls", HolodeckWeb.Poll.PollPage}, {"Results", nil}]
         )
         |> put_action(:init_chart)
@@ -48,16 +50,13 @@ defmodule HolodeckWeb.Poll.ResultPage do
       component.state.poll.answer_4
     ]
 
-    frequencies =
-      Enum.frequencies_by(component.state.answers, fn a ->
-        a.answer_number
-      end)
+    frequencies = component.state.frequencies
 
     counts = [
-      Map.get(frequencies, 1),
-      Map.get(frequencies, 2),
-      Map.get(frequencies, 3),
-      Map.get(frequencies, 4)
+      Map.get(frequencies, 1, 0),
+      Map.get(frequencies, 2, 0),
+      Map.get(frequencies, 3, 0),
+      Map.get(frequencies, 4, 0)
     ]
 
     buffer = JS.new(:Float64Array, [counts])
@@ -67,17 +66,53 @@ defmodule HolodeckWeb.Poll.ResultPage do
         "poll-results-chart",
         %{
           type: "bar",
-          data: %{labels: labels, datasets: [%{label: "Votes", data: buffer}]},
+          data: %{
+            labels: labels,
+            datasets: [
+              %{label: "Votes", data: buffer, backgroundColor: "#a78bfa", borderRadius: 5}
+            ]
+          },
           options: %{
             responsive: true,
             maintainAspectRatio: false,
-            scales: %{y: %{beginAtZero: true, ticks: %{precision: 0}}},
+            indexAxis: "y",
+            scales: %{
+              x: %{
+                beginAtZero: true,
+                ticks: %{precision: 0, color: "#a1a1aa"},
+                grid: %{color: "#27272a"}
+              },
+              y: %{ticks: %{color: "#d4d4d8"}, grid: %{display: false}}
+            },
             plugins: %{legend: %{display: false}}
           }
         }
       ])
 
-    put_state(component, chart: chart, frequencies: frequencies, buffer: buffer)
+    location = JS.get(:window, :location)
+    vote_url = JS.get(location, :origin) <> "/poll/#{component.state.poll.id}/vote"
+
+    put_state(component, chart: chart, buffer: buffer, vote_url: vote_url)
+  end
+
+  def action(:copy_link, _params, component) do
+    try do
+      clipboard = JS.get(:navigator, :clipboard)
+
+      if JS.typeof(clipboard) == "undefined" do
+        select_link(component)
+      else
+        clipboard |> JS.call(:writeText, [component.state.vote_url]) |> Task.await()
+
+        put_action(component,
+          name: :show,
+          target: "toast",
+          params: %{message: "Link copied", variant: :success}
+        )
+      end
+    rescue
+      _error -> select_link(component)
+    end
   end
 
   def action(:update_results, params, component) do
@@ -97,5 +132,17 @@ defmodule HolodeckWeb.Poll.ResultPage do
     answers = [result | answers]
 
     put_state(component, frequencies: frequencies, answers: answers)
+  end
+
+  defp select_link(component) do
+    input = JS.call(:document, :getElementById, ["poll-vote-url"])
+    JS.call(input, :focus, [])
+    JS.call(input, :select, [])
+
+    put_action(component,
+      name: :show,
+      target: "toast",
+      params: %{message: "Link selected — copy it to share", variant: :info}
+    )
   end
 end

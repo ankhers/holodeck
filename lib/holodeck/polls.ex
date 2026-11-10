@@ -11,6 +11,19 @@ defmodule Holodeck.Polls do
     |> Repo.insert()
   end
 
+  @doc "Returns the ten newest polls and their vote counts in a single query."
+  def recent_polls do
+    Repo.all(
+      from p in Poll,
+        left_join: r in Result,
+        on: r.poll_id == p.id,
+        group_by: p.id,
+        order_by: [desc: p.inserted_at, desc: p.id],
+        limit: 10,
+        select: %{poll: p, vote_count: count(r.id)}
+    )
+  end
+
   def get_poll(poll_id) do
     case Ecto.UUID.cast(poll_id) do
       {:ok, uuid} -> Repo.get(Poll, uuid)

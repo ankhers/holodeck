@@ -1,5 +1,5 @@
 defmodule Holodeck.PollsTest do
-  use Holodeck.DataCase, async: true
+  use Holodeck.DataCase, async: false
 
   alias Holodeck.Polls
 
@@ -18,6 +18,37 @@ defmodule Holodeck.PollsTest do
         assert {:error, changeset} = Polls.create_poll(Map.delete(@valid_poll, field))
         assert errors_on(changeset) == %{field => ["can't be blank"]}
       end
+    end
+  end
+
+  describe "recent_polls/0" do
+    test "includes zero-vote polls and counts all answers without loading them" do
+      Holodeck.HologramHelpers.ensure_pubsub_started()
+      {:ok, empty} = Polls.create_poll(@valid_poll)
+      {:ok, voted} = Polls.create_poll(@valid_poll)
+      {:ok, _} = Polls.vote(voted.id, 1)
+      {:ok, _} = Polls.vote(voted.id, 2)
+
+      entries = Map.new(Polls.recent_polls(), &{&1.poll.id, &1.vote_count})
+      assert entries == %{empty.id => 0, voted.id => 2}
+    end
+
+    test "returns only the latest ten polls, newest first" do
+      polls =
+        for n <- 1..12 do
+          {:ok, poll} = Polls.create_poll(@valid_poll)
+          inserted_at = NaiveDateTime.add(~N[2026-01-01 00:00:00], n)
+
+          Repo.update_all(
+            from(p in Holodeck.Polls.Poll, where: p.id == ^poll.id),
+            set: [inserted_at: inserted_at]
+          )
+
+          poll.id
+        end
+
+      assert Enum.map(Polls.recent_polls(), & &1.poll.id) ==
+               polls |> Enum.reverse() |> Enum.take(10)
     end
   end
 
