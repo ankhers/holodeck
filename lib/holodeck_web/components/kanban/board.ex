@@ -6,6 +6,8 @@ defmodule HolodeckWeb.Components.Kanban.Board do
 
   js_import :install, from: "./drag_drop.js", as: :install_drag_drop
 
+  @status_clear_delay 3_000
+
   def init(_props, component, server) do
     component =
       component
@@ -102,6 +104,17 @@ defmodule HolodeckWeb.Components.Kanban.Board do
         reset_confirmation:
           if(params.operation == :reset_board, do: nil, else: component.state.reset_confirmation)
       )
+      |> clear_status_later(params)
+    else
+      component
+    end
+  end
+
+  # Only the confirmation from the latest request may clear the line; a newer
+  # request has its own "Updating…" status that must stay visible.
+  def action(:clear_status, %{seq: seq}, component) do
+    if component.state.busy == nil and component.state.request_seq == seq do
+      put_state(component, :status, "")
     else
       component
     end
@@ -142,6 +155,12 @@ defmodule HolodeckWeb.Components.Kanban.Board do
       confirmed.cards
     end
   end
+
+  defp clear_status_later(component, %{status: :ok, seq: seq}) do
+    put_action(component, name: :clear_status, delay: @status_clear_delay, params: %{seq: seq})
+  end
+
+  defp clear_status_later(component, _params), do: component
 
   defp begin_mutation(component, operation, params) do
     seq = component.state.request_seq + 1

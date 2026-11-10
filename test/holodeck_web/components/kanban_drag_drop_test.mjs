@@ -54,10 +54,22 @@ test("delegated DnD dispatches validated moves, focus syncs, installation and cl
     };
     handlers.dragstart(event);
     assert.deepEqual(JSON.parse(payload), { card_id: id, expected_version: 1 });
+    assert.equal(card.dataset.dragging, "");
     handlers.dragover(event);
     assert.equal(prevented, 1);
+    assert.equal(column.dataset.dropTarget, "");
+    // Moving onto a child of the highlighted column keeps the highlight; leaving clears it.
+    column.contains = node => node === "child";
+    handlers.dragleave({ relatedTarget: "child" });
+    assert.equal(column.dataset.dropTarget, "");
+    handlers.dragleave({ relatedTarget: null });
+    assert.equal("dropTarget" in column.dataset, false);
+    handlers.dragover(event);
+    assert.equal(column.dataset.dropTarget, "");
     column.dataset.column = "done";
     handlers.drop(event);
+    assert.equal("dropTarget" in column.dataset, false);
+    assert.equal("dragging" in card.dataset, false);
     assert.deepEqual(calls.pop(), ["request_move", "kanban-board", { card_id: id, expected_version: 1, destination: "done" }]);
     for (const invalid of ["{", "null", "{}", JSON.stringify({ card_id: id, expected_version: -1 })]) {
       payload = invalid;
@@ -83,6 +95,79 @@ test("delegated DnD dispatches validated moves, focus syncs, installation and cl
     assert.ok(observers.every(observer => observer.disconnected));
     windowFocus();
     assert.equal(calls.length, 0);
+  } finally {
+    for (const [key, value] of Object.entries(old)) {
+      if (value === undefined) delete globalThis[key];
+      else globalThis[key] = value;
+    }
+  }
+});
+
+test("dragging hands the browser a tilted copy of the card, grabbed at the same point", async () => {
+  const handlers = {};
+  const appended = [];
+  let dragImage;
+  const strippedIds = [];
+  const makeElement = () => ({
+    style: {},
+    children: [],
+    attributes: {},
+    setAttribute(name, value) { this.attributes[name] = value; },
+    appendChild(child) { this.children.push(child); },
+    remove() { this.removed = true; },
+  });
+  const clone = {
+    style: {},
+    removeAttribute: name => strippedIds.push(["clone", name]),
+    querySelectorAll: () => [{ removeAttribute: name => strippedIds.push(["child", name]) }],
+  };
+  const card = {
+    dataset: { cardId: "00000000-0000-4000-8000-000000000001", version: "1" },
+    getAttribute: () => "true",
+    getBoundingClientRect: () => ({ left: 100, top: 50, width: 240 }),
+    cloneNode: deep => { assert.equal(deep, true); return clone; },
+  };
+  const root = {
+    isConnected: true,
+    getAttribute: () => "false",
+    addEventListener: (name, fn) => { handlers[name] = fn; },
+  };
+  const old = Object.fromEntries(["document", "window", "MutationObserver", "Hologram", "Element"].map(k => [k, globalThis[k]]));
+  globalThis.Element = class Element {};
+  globalThis.document = {
+    body: { appendChild: node => appended.push(node) },
+    getElementById: () => root,
+    createElement: tag => { assert.equal(tag, "div"); return makeElement(); },
+  };
+  globalThis.window = { addEventListener() {} };
+  globalThis.MutationObserver = class { observe() {} disconnect() {} };
+  globalThis.Hologram = { dispatchAction() {} };
+  try {
+    install("tilt-root", "kanban-board");
+    handlers.dragstart({
+      target: Object.assign(new Element(), { closest: () => card }),
+      clientX: 130,
+      clientY: 70,
+      preventDefault: () => assert.fail("a valid drag must not be cancelled"),
+      dataTransfer: {
+        setData() {},
+        setDragImage: (element, x, y) => { dragImage = { element, x, y }; },
+      },
+    });
+
+    const [wrapper] = appended;
+    assert.equal(wrapper.className, "hd-kanban-drag-image");
+    assert.equal(wrapper.attributes["aria-hidden"], "true");
+    assert.deepEqual(wrapper.children, [clone]);
+    assert.equal(clone.style.width, "240px");
+    // Copied ids would duplicate the live card's, so they are all stripped.
+    assert.deepEqual(strippedIds, [["clone", "id"], ["child", "id"]]);
+    // 30px/20px into the card, plus the wrapper's 24px padding.
+    assert.deepEqual(dragImage, { element: wrapper, x: 54, y: 44 });
+    assert.equal(card.dataset.dragging, "");
+
+    await new Promise(resolve => setTimeout(resolve, 0));
+    assert.equal(wrapper.removed, true);
   } finally {
     for (const [key, value] of Object.entries(old)) {
       if (value === undefined) delete globalThis[key];

@@ -208,12 +208,38 @@
 }
 
 /* Shared Kanban: native drag-and-drop, with keyboard and touch alternatives. */
-.hd-kanban-card[draggable="true"] { cursor: grab; transition: border-color 150ms ease, box-shadow 150ms ease; }
+.hd-kanban-card[draggable="true"] { cursor: grab; transition: border-color 150ms ease, box-shadow 150ms ease, opacity 150ms ease; }
 .hd-kanban-card[draggable="true"]:hover { border-color: color-mix(in oklch, var(--color-primary) 45%, transparent); box-shadow: 0 4px 16px #0002; }
 .hd-kanban-card[draggable="true"]:active { cursor: grabbing; }
+.hd-kanban-card[data-dragging] { opacity: 0.45; }
+/* Off-screen wrapper for the drag image; the tilted card inside is what the pointer carries. */
+.hd-kanban-drag-image { position: fixed; top: -10000px; left: -10000px; pointer-events: none; }
+.hd-kanban-drag-image > .hd-kanban-card {
+  transform: rotate(-3deg);
+  border-color: color-mix(in oklch, var(--color-primary) 55%, transparent);
+  box-shadow: 0 14px 28px rgb(0 0 0 / 0.45);
+}
+.hd-kanban-column { transition: border-color 150ms ease, background-color 150ms ease; }
+.hd-kanban-column[data-drop-target] {
+  border-color: color-mix(in oklch, var(--color-primary) 60%, transparent);
+  background: color-mix(in oklch, var(--color-primary) 6%, transparent);
+}
+.hd-kanban-empty {
+  border: 1px dashed color-mix(in oklch, var(--color-base-content) 15%, transparent);
+  border-radius: 8px;
+  padding: 20px 12px;
+  text-align: center;
+  font-size: 12px;
+  color: color-mix(in oklch, var(--color-base-content) 45%, transparent);
+  transition: border-color 150ms ease, color 150ms ease;
+}
+.hd-kanban-column[data-drop-target] .hd-kanban-empty {
+  border-color: color-mix(in oklch, var(--color-primary) 50%, transparent);
+  color: var(--color-primary);
+}
 .hd-kanban-board[aria-busy="true"] .hd-kanban-column { opacity: 0.8; }
 @media (prefers-reduced-motion: reduce) {
-  .hd-kanban-card { transition: none; }
+  .hd-kanban-card, .hd-kanban-column, .hd-kanban-empty { transition: none; }
 }
 
 /* Dashboard specifics */

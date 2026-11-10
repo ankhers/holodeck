@@ -50,6 +50,24 @@ defmodule HolodeckWeb.Components.KanbanTest do
              Kanban.snapshot()
   end
 
+  test "empty columns show a drop hint that disappears once they hold a card" do
+    render = fn cards ->
+      assigns = %{column: "done", label: "Done", cards: cards, disabled: false}
+
+      {tree, _registry, _server} =
+        Hologram.Template.Renderer.render_tree(
+          Column.template().(assigns),
+          %Hologram.Template.Renderer.Env{},
+          %Server{}
+        )
+
+      tree |> Hologram.Template.Renderer.print_dom() |> LazyHTML.from_fragment()
+    end
+
+    assert render.([]) |> LazyHTML.query(".hd-kanban-empty") |> Enum.count() == 1
+    assert render.([card()]) |> LazyHTML.query(".hd-kanban-empty") |> Enum.count() == 0
+  end
+
   test "card confirmation initializes on both server and dynamic browser mounts" do
     assert Card.init(%{}, %Component{}).state.delete_confirmation == false
     assert Card.init(%{}, %Component{}, %Server{}).state.delete_confirmation == false
@@ -133,6 +151,32 @@ defmodule HolodeckWeb.Components.KanbanTest do
     assert late.state.pending == newer.state.pending
     assert late.state.busy == 2
     assert Board.action(:mutation_timeout, %{seq: 1}, newer) == newer
+  end
+
+  test "a successful update shows a status that clears itself unless a newer request started" do
+    done = snapshot(2, [%{card() | column: "done", version: 2}])
+    # The runtime consumes the request's own timeout action before the reply arrives.
+    moving = %{moving() | next_action: nil}
+    result = settled(moving, 1, done)
+    assert result.state.status == "Board updated."
+    assert result.next_action.name == :clear_status
+    assert result.next_action.delay == 3_000
+    assert result.next_action.params == %{seq: 1}
+
+    cleared = Board.action(:clear_status, result.next_action.params, result)
+    assert cleared.state.status == ""
+
+    newer =
+      Board.action(
+        :request_move,
+        %{card_id: "a", expected_version: 2, destination: "doing"},
+        %{result | next_action: nil}
+      )
+
+    assert Board.action(:clear_status, %{seq: 1}, newer).state.status == "Updating…"
+
+    failed = settled(moving, 1, snapshot(2, []), :conflict)
+    assert failed.next_action == nil
   end
 
   test "timeout clears and fetches without retry; late response can still advance confirmed" do
