@@ -18,6 +18,7 @@ defmodule HolodeckWeb.Chat.RoomPage do
     component =
       put_state(component,
         messages: messages,
+        utc_today: Date.utc_today(),
         room: room,
         breadcrumbs: [
           {"Chat", HolodeckWeb.Chat.LobbyPage},
@@ -110,8 +111,29 @@ defmodule HolodeckWeb.Chat.RoomPage do
   ]
   @colours_length length(@colours)
 
-  def username_colour(<<first, _::binary>>) do
-    index = rem(first, @colours_length)
+  # Use every Unicode codepoint, with a bounded accumulator for the JS runtime.
+  def username_colour(username) do
+    index =
+      username
+      |> String.to_charlist()
+      |> Enum.reduce(0, fn codepoint, hash -> rem(hash * 31 + codepoint, @colours_length) end)
+
     Enum.at(@colours, index)
   end
+
+  # Compare calendar fields directly: no client-side timezone or calendar conversion needed.
+  # The reference day is captured server-side when the room opens.
+  def message_time(timestamp, today) do
+    time = pad_time(timestamp.hour) <> ":" <> pad_time(timestamp.minute) <> " UTC"
+
+    if {timestamp.year, timestamp.month, timestamp.day} == {today.year, today.month, today.day} do
+      time
+    else
+      Integer.to_string(timestamp.year) <>
+        "-" <> pad_time(timestamp.month) <> "-" <> pad_time(timestamp.day) <> " · " <> time
+    end
+  end
+
+  defp pad_time(value) when value < 10, do: "0" <> Integer.to_string(value)
+  defp pad_time(value), do: Integer.to_string(value)
 end

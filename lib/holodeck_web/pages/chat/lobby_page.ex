@@ -49,6 +49,12 @@ defmodule HolodeckWeb.Chat.LobbyPage do
   end
 
   def command(:save_username, params, server) do
-    put_session(server, "holodeck_chat_username", params.username)
+    server
+    |> put_session("holodeck_chat_username", params.username)
+    |> put_action(
+      name: :show,
+      target: "toast",
+      params: %{message: "Username saved", variant: :success}
+    )
   end
 end

@@ -6,23 +6,30 @@
       <Hologram.UI.Link to={HolodeckWeb.Chat.LobbyPage} class="text-secondary">Back to the lobby</Hologram.UI.Link>
     </div>
   {%else}
-    <div id="messages" class="relative z-[1] flex-1 min-h-0 overflow-y-auto p-4 flex flex-col-reverse gap-2.5 font-mono">
+    <div id="messages" role="log" aria-label="Room messages" class="relative z-[1] flex-1 min-h-0 overflow-y-auto p-4 flex flex-col-reverse gap-2.5 font-mono w-full max-w-3xl mx-auto">
       {%for message <- @messages}
-        <div>
-          <span style={"color: " <> username_colour(message.username) <> "; font-size: 12px;"}>{message.username}</span>
-          <span class="text-base-content/25 text-[11px] ml-2">{message.inserted_at}</span>
-          <div class="text-base-content/75 mt-0.5">{message.message}</div>
+        <div class="shrink-0 min-w-0">
+          <div class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+            <span class="text-[12px] break-all" style={"color: " <> username_colour(message.username)}>{message.username}</span>
+            <time class="text-base-content/40 text-[11px]">{message_time(message.inserted_at, @utc_today)}</time>
+          </div>
+          <div class="text-base-content/75 text-[13px] leading-relaxed mt-0.5 whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{message.message}</div>
         </div>
       {/for}
     </div>
 
     {%if @username != ""}
-      <form id="message-form" $submit="send_message" class="relative z-[1] border-t border-white/[0.15] px-4 py-3 flex gap-2 bg-base-100 shrink-0">
-        <input type="text" name="message" value={@draft} $change="update_draft" placeholder="Type a message..." autocomplete="off" class="flex-1 bg-base-300 border border-white/20 rounded px-3 py-2 text-base-content font-mono text-[13px] outline-none" />
-        <button type="submit" class="bg-primary text-primary-content border-none rounded px-4 py-2 font-semibold cursor-pointer font-mono">Send</button>
-      </form>
+      <div class="relative z-[1] border-t border-white/15 bg-base-100 shrink-0">
+        <form id="message-form" $submit="send_message" class="w-full max-w-3xl mx-auto px-4 py-3 flex items-end gap-2">
+          <div class="flex-1 min-w-0">
+            <label for="chat-message" class="sr-only">Message</label>
+            <input id="chat-message" type="text" name="message" value={@draft} $change="update_draft" placeholder="Type a message..." autocomplete="off" class="w-full bg-base-100 border border-white/15 rounded-md px-3 py-2 text-[13px] font-mono text-base-content placeholder:text-base-content/30 outline-none transition-colors focus:border-primary/60 focus:ring-2 focus:ring-primary/20" />
+          </div>
+          <button id="send-message" type="submit" class="bg-primary text-primary-content rounded-md px-3.5 py-2 text-[13px] font-semibold font-mono cursor-pointer transition hover:brightness-110 active:translate-y-px disabled:opacity-50 disabled:cursor-not-allowed">Send</button>
+        </form>
+      </div>
     {%else}
-      <div id="username-required" class="relative z-[1] border-t border-white/[0.15] px-4 py-3 bg-base-100 shrink-0">
+      <div id="username-required" class="relative z-[1] border-t border-white/15 px-4 py-3 bg-base-100 shrink-0 text-[13px] font-mono">
         Set a username in the <Hologram.UI.Link to={HolodeckWeb.Chat.LobbyPage} class="text-secondary">lobby</Hologram.UI.Link> to send messages.
       </div>
     {/if}

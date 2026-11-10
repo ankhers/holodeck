@@ -6,6 +6,24 @@ defmodule HolodeckWeb.Chat.RoomPageTest do
   alias Holodeck.Chat
   alias HolodeckWeb.Chat.RoomPage
 
+  test "message times show minutes in UTC and include the date on other days" do
+    today = ~D[2026-05-30]
+    assert RoomPage.message_time(~N[2026-05-30 09:02:13], today) == "09:02 UTC"
+
+    assert RoomPage.message_time(~N[2026-05-29 14:32:59], today) ==
+             "2026-05-29 · 14:32 UTC"
+
+    assert RoomPage.message_time(~N[2025-01-01 00:00:00], today) ==
+             "2025-01-01 · 00:00 UTC"
+  end
+
+  test "username colours use the whole name and support empty and Unicode names" do
+    assert RoomPage.username_colour("Alice") != RoomPage.username_colour("Amy")
+    assert RoomPage.username_colour("Alice") == RoomPage.username_colour("Alice")
+    assert RoomPage.username_colour("Élodie") =~ ~r/^#[0-9a-f]{6}$/
+    assert RoomPage.username_colour("") =~ ~r/^#[0-9a-f]{6}$/
+  end
+
   test "a missing room renders without loading messages or subscribing" do
     {component, server} = RoomPage.init(%{room_name: "missing"}, %Component{}, %Server{})
 
