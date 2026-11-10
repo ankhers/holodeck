@@ -49,3 +49,8 @@ devenv.local.yaml
 
 # Hologram generated JavaScript bundles.
 /priv/static/hologram/
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key
