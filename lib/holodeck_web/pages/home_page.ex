@@ -1,7 +1,6 @@
 defmodule HolodeckWeb.HomePage do
   use HolodeckWeb, :page
 
-  alias Hologram.UI.Link
   alias HolodeckWeb.Components.Card
 
   route "/"
