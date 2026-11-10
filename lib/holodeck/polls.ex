@@ -6,8 +6,6 @@ defmodule Holodeck.Polls do
   import Ecto.Query
 
   def create_poll(params) do
-    dbg(params)
-
     %Poll{}
     |> Poll.create_changeset(params)
     |> Repo.insert()

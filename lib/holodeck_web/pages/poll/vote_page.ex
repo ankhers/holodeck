@@ -28,15 +28,16 @@ defmodule HolodeckWeb.Poll.VotePage do
   end
 
   def command(:vote, params, server) do
-    dbg(params)
-
     case Polls.vote(params.poll_id, params.answer_number) do
       {:ok, _result} ->
         put_action(server, :vote_complete)
 
       {:error, _reason} ->
-        # TODO: Show error
-        server
+        put_action(server,
+          name: :show,
+          target: "toast",
+          params: %{message: "Could not submit your vote. Please try again.", variant: :error}
+        )
     end
   end
 end
