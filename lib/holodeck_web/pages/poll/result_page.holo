@@ -16,7 +16,7 @@
               </li>
             {/for}
           </ul>
-          <p id="poll-vote-total" class="text-base-content/50 text-[11px] uppercase tracking-[1px] font-mono text-right mt-3">{length(@answers)} {if length(@answers) == 1 do "vote" else "votes" end}</p>
+          <p id="poll-vote-total" data-vote-count={length(@answers)} class="text-base-content/50 text-[11px] uppercase tracking-[1px] font-mono text-right mt-3">{length(@answers)} {if length(@answers) == 1 do "vote" else "votes" end}</p>
         </section>
         <div class="border-t border-white/10 pt-4">
           <label for="poll-vote-url" class="block text-[11px] uppercase tracking-[0.08em] font-mono text-base-content/50 mb-1.5">Share this poll</label>
