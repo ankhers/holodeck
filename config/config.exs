@@ -52,6 +52,8 @@ config :tailwind,
     cd: Path.expand("..", __DIR__)
   ]
 
+config :holodeck, HolodeckWeb.LogBroadcaster, min_level: :info
+
 # Configure Elixir's Logger
 config :logger, :default_formatter,
   format: "$time $metadata[$level] $message\n",

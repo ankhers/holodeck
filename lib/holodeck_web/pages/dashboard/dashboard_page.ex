@@ -129,8 +129,6 @@ defmodule HolodeckWeb.Dashboard.DashboardPage do
   def format_time(timestamp),
     do: timestamp |> DateTime.from_unix!(:microsecond) |> Calendar.strftime("%H:%M:%S")
 
-  def log_module(log), do: log.module
-
   def log_level_text_colour(%{level: :warning}), do: "#fbbf24"
   def log_level_text_colour(%{level: :error}), do: "#f87171"
   def log_level_text_colour(%{level: :debug}), do: "#9ca3af"
