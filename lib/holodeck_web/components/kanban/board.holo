@@ -1,4 +1,4 @@
-<div id="kanban-board-root" class="kanban-board" aria-busy={@busy != nil}>
+<div id="kanban-board-root" class="kanban-board" aria-busy={if(@busy != nil, do: "true", else: "false")}>
   <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
     <div>
       <h1 class="text-2xl font-bold tracking-tight">Shared Kanban</h1>

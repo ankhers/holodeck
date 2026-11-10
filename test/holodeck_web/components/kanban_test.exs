@@ -50,6 +50,11 @@ defmodule HolodeckWeb.Components.KanbanTest do
              Kanban.snapshot()
   end
 
+  test "card confirmation initializes on both server and dynamic browser mounts" do
+    assert Card.init(%{}, %Component{}).state.delete_confirmation == false
+    assert Card.init(%{}, %Component{}, %Server{}).state.delete_confirmation == false
+  end
+
   test "move targets the owning column, which forwards to the board" do
     card_component = %Component{
       props: %{card: card(), column_cid: "kanban-column-todo", disabled: false}

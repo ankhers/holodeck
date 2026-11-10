@@ -23,6 +23,8 @@ defmodule HolodeckWeb.HomePage do
         <Card icon="hero-squares-2x2" title="Dashboard" body="Live system metrics, process info, and log streaming." feature="Server ticks & log streaming" link_page={HolodeckWeb.Dashboard.DashboardPage} />
 
         <Card icon="hero-chart-bar" title="Polls" body="Live voting with real-time results, using Chart.js for visualizations." feature="JS interop with Chart.js" link_page={HolodeckWeb.Poll.PollPage} />
+
+        <Card icon="hero-view-columns" title="Shared Kanban" body="Move cards together on a shared board." feature="Nested stateful components · targeted actions · optimistic updates" link_page={HolodeckWeb.Kanban.BoardPage} />
       </div>
 
       <!-- The footer follows the content's 12-unit bottom gap; its negative margin cancels the shell's bottom padding. -->

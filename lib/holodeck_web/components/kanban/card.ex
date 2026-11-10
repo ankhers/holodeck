@@ -5,7 +5,9 @@ defmodule HolodeckWeb.Components.Kanban.Card do
   prop :column_cid, :string
   prop :disabled, :boolean
 
-  def init(_props, component, _server), do: put_state(component, :delete_confirmation, false)
+  # New cards mount in the browser; the initial board mounts on the server.
+  def init(_props, component), do: put_state(component, :delete_confirmation, false)
+  def init(props, component, _server), do: init(props, component)
 
   def action(:move, params, component) do
     if component.props.disabled do
