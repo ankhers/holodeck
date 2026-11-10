@@ -1,18 +1,18 @@
-<article id={"kanban-card-" <> @card.id} tabindex="-1" data-card-id={@card.id} data-version={@card.version} draggable={!@disabled} class="kanban-card rounded-lg border border-white/15 bg-base-100 p-3 shadow-sm focus-visible:outline-2 focus-visible:outline-primary">
+<article id={"kanban-card-" <> @card.id} tabindex="-1" data-card-id={@card.id} data-version={@card.version} draggable={!@disabled} class="hd-kanban-card rounded-lg border border-white/15 bg-base-100 p-3 shadow-sm focus-visible:outline-2 focus-visible:outline-primary">
   <p class="text-sm leading-relaxed break-words mb-4">{@card.title}</p>
   <div class="flex flex-wrap gap-1.5">
     {%for {destination, label} <- [{"todo", "To do"}, {"doing", "In progress"}, {"done", "Done"}]}
       {%if destination != @card.column}
-        <button type="button" data-move-card={@card.id} $click={:move, destination: destination} disabled={@disabled} class="kanban-button text-xs">Move → {label}</button>
+        <button type="button" data-move-card={@card.id} $click={:move, destination: destination} disabled={@disabled} aria-label={"Move " <> @card.title <> " to " <> label} class="hd-kanban-button text-xs">Move → {label}</button>
       {/if}
     {/for}
-    <button type="button" $click="confirm_delete" disabled={@disabled} aria-label={"Delete " <> @card.title} class="kanban-button text-xs">Delete</button>
+    <button type="button" data-delete-card={@card.id} $click="confirm_delete" disabled={@disabled} aria-label={"Delete " <> @card.title} class="hd-kanban-button text-xs">Delete</button>
   </div>
   {%if @delete_confirmation}
     <div class="mt-3 pt-3 border-t border-white/10 text-xs">
       <p class="mb-2">Delete this public card?</p>
-      <button type="button" $click="delete" disabled={@disabled} class="kanban-button text-xs">Yes, delete</button>
-      <button type="button" $click="cancel_delete" class="kanban-button text-xs">Cancel</button>
+      <button id={"kanban-card-confirm-" <> @card.id} type="button" $click="delete" disabled={@disabled} class="hd-kanban-button text-xs">Yes, delete</button>
+      <button id={"kanban-card-cancel-" <> @card.id} type="button" $click="cancel_delete" class="hd-kanban-button text-xs">Cancel</button>
     </div>
   {/if}
 </article>

@@ -25,9 +25,10 @@ test("delegated DnD dispatches validated moves, focus syncs, installation and cl
     getAttribute: () => String(busy),
     addEventListener: (name, fn) => { assert.equal(handlers[name], undefined); handlers[name] = fn; },
   };
-  const old = Object.fromEntries(["document", "window", "MutationObserver", "Hologram"].map(k => [k, globalThis[k]]));
+  const old = Object.fromEntries(["document", "window", "MutationObserver", "Hologram", "Element"].map(k => [k, globalThis[k]]));
   let windowFocus;
   let signal;
+  globalThis.Element = class Element {};
   globalThis.document = { body: {}, getElementById: key => key === "root" ? root : card };
   globalThis.window = { addEventListener: (_, fn, options) => { windowFocus = fn; signal = options.signal; } };
   globalThis.MutationObserver = class {
@@ -43,7 +44,7 @@ test("delegated DnD dispatches validated moves, focus syncs, installation and cl
     let payload;
     let prevented = 0;
     const event = {
-      target: { closest: selector => selector === "[data-card-id]" ? card : column },
+      target: Object.assign(new Element(), { closest: selector => selector === "[data-card-id]" ? card : column }),
       preventDefault: () => { prevented++; },
       dataTransfer: {
         types: ["application/x-holodeck-card"],
@@ -72,7 +73,7 @@ test("delegated DnD dispatches validated moves, focus syncs, installation and cl
     assert.deepEqual(calls.pop(), ["sync", "kanban-board", {}]);
 
     column.dataset.column = "todo";
-    handlers.click({ detail: 0, target: { closest: () => ({ dataset: { moveCard: id }, closest: () => column }) } });
+    handlers.click({ detail: 0, target: Object.assign(new Element(), { closest: () => ({ dataset: { moveCard: id }, closest: () => column }) }) });
     column.dataset.column = "done";
     observers[0].fn();
     assert.equal(focused, true);

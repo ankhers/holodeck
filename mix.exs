@@ -87,7 +87,13 @@ defmodule Holodeck.MixProject do
         "tailwind holodeck --minify",
         "phx.digest"
       ],
-      precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "test"]
+      precommit: [
+        "compile --warnings-as-errors",
+        "deps.unlock --unused",
+        "format",
+        "cmd node --test test/holodeck_web/components/kanban_drag_drop_test.mjs",
+        "test"
+      ]
     ]
   end
 end

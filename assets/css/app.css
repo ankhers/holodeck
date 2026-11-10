@@ -138,7 +138,7 @@
 /* This file is for your main application CSS */
 
 /* Shared Kanban: custom controls, with native keyboard and touch alternatives. */
-.kanban-button {
+.hd-kanban-button {
   appearance: none;
   border: 1px solid color-mix(in oklch, var(--color-base-content) 15%, transparent);
   border-radius: 6px;
@@ -149,19 +149,19 @@
   cursor: pointer;
   transition: background 150ms ease, border-color 150ms ease, opacity 150ms ease;
 }
-.kanban-button:hover:not(:disabled) {
+.hd-kanban-button:hover:not(:disabled) {
   background: color-mix(in oklch, var(--color-primary) 10%, transparent);
   border-color: color-mix(in oklch, var(--color-primary) 50%, transparent);
 }
-.kanban-button:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
-.kanban-button:disabled { opacity: 0.45; cursor: not-allowed; }
-.kanban-button-primary { background: var(--color-primary); color: var(--color-primary-content); }
-.kanban-card[draggable="true"] { cursor: grab; transition: border-color 150ms ease, box-shadow 150ms ease; }
-.kanban-card[draggable="true"]:hover { border-color: color-mix(in oklch, var(--color-primary) 45%, transparent); box-shadow: 0 4px 16px #0002; }
-.kanban-card[draggable="true"]:active { cursor: grabbing; }
-.kanban-board[aria-busy="true"] .kanban-column { opacity: 0.8; }
+.hd-kanban-button:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.hd-kanban-button:disabled { opacity: 0.45; cursor: not-allowed; }
+.hd-kanban-button-primary { background: var(--color-primary); color: var(--color-primary-content); }
+.hd-kanban-card[draggable="true"] { cursor: grab; transition: border-color 150ms ease, box-shadow 150ms ease; }
+.hd-kanban-card[draggable="true"]:hover { border-color: color-mix(in oklch, var(--color-primary) 45%, transparent); box-shadow: 0 4px 16px #0002; }
+.hd-kanban-card[draggable="true"]:active { cursor: grabbing; }
+.hd-kanban-board[aria-busy="true"] .hd-kanban-column { opacity: 0.8; }
 @media (prefers-reduced-motion: reduce) {
-  .kanban-button, .kanban-card { transition: none; }
+  .hd-kanban-button, .hd-kanban-card { transition: none; }
 }
 
 /* Dashboard specifics */
