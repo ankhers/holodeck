@@ -53,6 +53,11 @@ defmodule Holodeck.ChatTest do
       assert errors_on(changeset).message == ["can't be blank"]
     end
 
+    test "rejects an unknown room" do
+      assert {:error, changeset} = Chat.create_message("Alice", Ecto.UUID.generate(), "Hello!")
+      assert errors_on(changeset).room == ["does not exist"]
+    end
+
     test "requires a room" do
       assert {:error, changeset} = Chat.create_message("Alice", nil, "Hello!")
       assert errors_on(changeset).room_id == ["can't be blank"]
@@ -62,6 +67,7 @@ defmodule Holodeck.ChatTest do
   test "get_messages_for_room returns only that room's messages, newest first" do
     {:ok, room} = Chat.create_room("general", "Alice")
     {:ok, other_room} = Chat.create_room("other", "Bob")
+    # Insert newest first so the assertion distinguishes timestamp order from insertion order.
     {:ok, newest} = Chat.create_message("Alice", room.id, "Newest")
     {:ok, oldest} = Chat.create_message("Alice", room.id, "Oldest")
     {:ok, _other} = Chat.create_message("Bob", other_room.id, "Elsewhere")

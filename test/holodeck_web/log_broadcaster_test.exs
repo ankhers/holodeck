@@ -26,8 +26,7 @@ defmodule HolodeckWeb.LogBroadcasterTest do
       end
     end)
 
-    # Hologram's supervision tree is off in tests unless HOLOGRAM_START=1.
-    start_supervised!({Phoenix.PubSub, name: Hologram.PubSub})
+    Holodeck.HologramHelpers.ensure_pubsub_started()
     Phoenix.PubSub.subscribe(Hologram.PubSub, "hologram:channel:dashboard:logs")
     :ok
   end

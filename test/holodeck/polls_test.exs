@@ -46,7 +46,7 @@ defmodule Holodeck.PollsTest do
 
   describe "vote/2" do
     test "persists each valid answer" do
-      start_supervised!({Phoenix.PubSub, name: Hologram.PubSub})
+      Holodeck.HologramHelpers.ensure_pubsub_started()
       {:ok, poll} = Polls.create_poll(@valid_poll)
 
       votes =

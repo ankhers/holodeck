@@ -20,6 +20,7 @@ defmodule Holodeck.Chat.Message do
     |> validate_username()
     |> validate_message()
     |> validate_room()
+    |> assoc_constraint(:room)
   end
 
   defp validate_username(changeset) do

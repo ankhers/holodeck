@@ -8,7 +8,7 @@ defmodule HolodeckWeb do
       use HolodeckWeb, :page
       use HolodeckWeb, :html
 
-  The definitions below will be executed for every controller,
+  The definitions below will be executed for every page,
   component, etc, so keep them short and clean, focused
   on imports, uses and aliases.
 
