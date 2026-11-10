@@ -11,12 +11,12 @@ defmodule HolodeckWeb.Chat.RoomPage do
   def init(params, component, server) do
     username = get_session(server, "holodeck_chat_username")
     room = Chat.get_room_by_name(params.room_name)
-    messages = Chat.get_messages_for_room(room)
+    messages = if room, do: Chat.get_messages_for_room(room), else: []
 
     component =
       put_state(component, messages: messages, room: room, username: username, draft: "")
 
-    server = put_subscription(server, {:chat_room, room.name})
+    server = if room, do: put_subscription(server, {:chat_room, room.name}), else: server
 
     {component, server}
   end
