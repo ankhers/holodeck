@@ -17,6 +17,7 @@ defmodule Holodeck.Chat.Room do
     |> cast(params, [:name, :creator])
     |> validate_name()
     |> validate_creator()
+    |> unique_constraint(:name, message: "A room with this name already exists")
   end
 
   def validate_name(changeset) do
