@@ -8,6 +8,7 @@ defmodule HolodeckWeb.Dashboard.DashboardPage do
   layout HolodeckWeb.Chat.Layout
 
   @tick_delay 5_000
+  @log_limit 100
 
   def init(_params, component, server) do
     process_sort = get_session(server, "holodeck_dashboard_process_sort", :memory)
@@ -25,7 +26,7 @@ defmodule HolodeckWeb.Dashboard.DashboardPage do
   end
 
   def action(:logger, params, component) do
-    put_state(component, log_msgs: [params | component.state.log_msgs])
+    put_state(component, log_msgs: Enum.take([params | component.state.log_msgs], @log_limit))
   end
 
   def action(:sort_memory, _params, component) do
@@ -128,16 +129,7 @@ defmodule HolodeckWeb.Dashboard.DashboardPage do
   def format_time(timestamp),
     do: timestamp |> DateTime.from_unix!(:microsecond) |> Calendar.strftime("%H:%M:%S")
 
-  def log_module(log) do
-    if Map.has_key?(log.meta, :mfa) do
-      log.meta.mfa
-      |> elem(0)
-      |> Atom.to_string()
-      |> String.replace_prefix("Elixir.", "")
-    else
-      ""
-    end
-  end
+  def log_module(log), do: log.module
 
   def log_level_text_colour(%{level: :warning}), do: "#fbbf24"
   def log_level_text_colour(%{level: :error}), do: "#f87171"

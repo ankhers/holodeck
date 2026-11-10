@@ -148,7 +148,7 @@
         {%for log <- @log_msgs}
           <div class="hd-log-row grid grid-cols-[auto_auto_auto_1fr] gap-2.5 items-baseline px-1 py-[7px] border-b border-white/[0.04] rounded">
             <span class="text-[10px] font-bold px-1 py-px rounded-[3px] text-center self-center" style={"background: #{log_level_background_colour(log)}; color: #{log_level_text_colour(log)};"}>{log_level(log)}</span>
-            <span class="text-base-content/50">{format_time(log.meta.time)}</span>
+            <span class="text-base-content/50">{format_time(log.time)}</span>
             <span class="text-primary">[{log_module(log)}]</span>
             <span class="text-base-content/75 break-words">{log.msg}</span>
           </div>

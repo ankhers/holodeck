@@ -13,7 +13,9 @@ defmodule Holodeck.Dashboard do
 
     short_processes =
       processes
-      |> Enum.map(fn p -> {p, Process.info(p, [:registered_name, :reductions, :status, :memory])} end)
+      |> Enum.map(fn p ->
+        {p, Process.info(p, [:registered_name, :reductions, :status, :memory])}
+      end)
       |> Enum.filter(fn {_p, info} -> info != nil end)
       |> Enum.sort_by(sort_value, direction)
       |> Enum.take(20)

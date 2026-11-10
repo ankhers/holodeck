@@ -69,6 +69,8 @@ config :holodeck, HolodeckWeb.Endpoint,
 # Enable dev routes for dashboard and mailbox
 config :holodeck, dev_routes: true
 
+config :holodeck, HolodeckWeb.LogBroadcaster, min_level: :debug
+
 # Do not include metadata nor timestamps in development logs
 config :logger, :default_formatter, format: "[$level] $message\n"
 

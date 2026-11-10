@@ -61,8 +61,12 @@ A live view into the running BEAM/system.
 - Metrics refresh on a recurring server `tick` (every 5s) via a self-rescheduling
   action.
 - **Log streaming:** `HolodeckWeb.LogBroadcaster` is installed as an Erlang
-  `:logger` handler. Every log entry is broadcast over the `{:dashboard, "logs"}`
-  subscription and streamed into the page in real time, colour-coded by level.
+  `:logger` handler. String log messages at or above the configured minimum level
+  (`:debug` in dev, `:info` in prod) are broadcast over `{:dashboard, "logs"}`.
+  The page retains the newest 100 entries, colour-coded by level. Broadcasts contain
+  only level, ANSI-stripped message, timestamp, and module name—not arbitrary logger
+  metadata. This is still a public log feed: message text is not redacted and may
+  contain sensitive information, so avoid logging secrets at broadcast levels.
 
 ### Polls — `/poll`
 
