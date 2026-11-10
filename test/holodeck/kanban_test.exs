@@ -65,6 +65,7 @@ defmodule Holodeck.KanbanTest do
             %{},
             %{title: " "},
             %{title: 12},
+            %{title: <<255>>},
             %{title: String.duplicate("a", 121)},
             %{title: String.duplicate("e\u0301", 61)}
           ] do
@@ -75,10 +76,13 @@ defmodule Holodeck.KanbanTest do
       assert {:ok, snapshot} = Kanban.add_card(%{"title" => "  hello  ", "column" => "done"})
       assert List.last(snapshot.cards).title == "hello"
       assert snapshot.revision == initial.revision + 1
-      assert {:error, :conflict, ^snapshot} = Kanban.move_card(%{card_id: "bad"})
+      assert {:error, :invalid_column, ^snapshot} = Kanban.move_card(%{card_id: "bad"})
       assert {:error, :conflict, ^snapshot} = Kanban.delete_card(nil)
       card = hd(snapshot.cards)
       assert {:error, :invalid_column, ^snapshot} = Kanban.move_card(move(card, "bad"))
+
+      assert {:error, :invalid_column, ^snapshot} =
+               Kanban.move_card(move(card, {:error, :untrusted}))
     end)
   end
 
@@ -144,10 +148,20 @@ defmodule Holodeck.KanbanTest do
       current = Kanban.snapshot()
 
       if Enum.any?(current.cards, &(&1.id == card.id)) do
+        moved = Enum.find(current.cards, &(&1.id == card.id))
+        assert moved.version == card.version + 1
+        assert moved.column == "done"
+        assert current.revision == initial.revision + 1
+
         assert {:ok, reset} =
                  Kanban.reset_board(%{confirmed: true, expected_revision: current.revision})
 
         refute Enum.any?(reset.cards, &(&1.id in Enum.map(initial.cards, fn c -> c.id end)))
+      else
+        assert current.revision == initial.revision + 1
+        assert length(current.cards) == 6
+        refute Enum.any?(current.cards, &(&1.id in Enum.map(initial.cards, fn c -> c.id end)))
+        assert {:error, :conflict, ^current} = Kanban.move_card(move(card, "done"))
       end
     end)
   end

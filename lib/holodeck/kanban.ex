@@ -16,7 +16,9 @@ defmodule Holodeck.Kanban do
 
   def snapshot do
     # Locking also keeps the revision and cards from different writes out of one snapshot.
-    {:ok, snapshot} = Repo.transaction(fn -> locked_board() |> snapshot_for() end)
+    {:ok, snapshot} =
+      Repo.transaction(fn -> board_query(:share) |> Repo.one!() |> snapshot_for() end)
+
     snapshot
   end
 
@@ -24,7 +26,7 @@ defmodule Holodeck.Kanban do
     mutate(fn board ->
       title = value(params, :title)
       column = value(params, :column) || "todo"
-      title = if is_binary(title), do: String.trim(title), else: ""
+      title = if is_binary(title) && String.valid?(title), do: String.trim(title), else: ""
 
       cond do
         length(String.to_charlist(title)) not in 1..120 ->
@@ -51,8 +53,10 @@ defmodule Holodeck.Kanban do
 
   def move_card(params) do
     mutate(fn board ->
-      with {:ok, card} <- current_card(params),
-           destination when destination in @columns <- value(params, :destination) do
+      destination = value(params, :destination)
+
+      with true <- destination in @columns,
+           {:ok, card} <- current_card(params) do
         if destination == card.column do
           :unchanged
         else
@@ -117,7 +121,7 @@ defmodule Holodeck.Kanban do
   defp mutate(fun) do
     {:ok, result} =
       Repo.transaction(fn ->
-        board = locked_board()
+        board = board_query(:update) |> Repo.one!()
 
         case fun.(board) do
           {:error, reason} ->
@@ -139,7 +143,8 @@ defmodule Holodeck.Kanban do
     result
   end
 
-  defp locked_board, do: Repo.one!(from b in Board, where: b.id == "public", lock: "FOR UPDATE")
+  defp board_query(:share), do: from(b in Board, where: b.id == "public", lock: "FOR SHARE")
+  defp board_query(:update), do: from(b in Board, where: b.id == "public", lock: "FOR UPDATE")
 
   defp snapshot_for(board) do
     cards =

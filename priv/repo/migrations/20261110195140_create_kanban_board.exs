@@ -31,18 +31,31 @@ defmodule Holodeck.Repo.Migrations.CreateKanbanBoard do
 
     create index(:kanban_cards, [:board_id, :column, :position])
 
-    execute "INSERT INTO kanban_boards (id) VALUES ('public')"
+    flush()
+    repo().insert_all("kanban_boards", [%{id: "public"}])
+    now = DateTime.utc_now()
 
-    for {title, column, position} <- [
-          {"Explore Hologram", "todo", 1},
-          {"Try a targeted action", "todo", 2},
-          {"Move a card", "doing", 3},
-          {"Open another browser", "doing", 4},
-          {"Build something together", "done", 5},
-          {"Celebrate the small wins", "done", 6}
-        ] do
-      execute "INSERT INTO kanban_cards (id, board_id, title, \"column\", position, inserted_at, updated_at) VALUES ('#{Ecto.UUID.generate()}', 'public', '#{title}', '#{column}', #{position}, NOW(), NOW())"
-    end
+    cards =
+      for {title, column, position} <- [
+            {"Explore Hologram", "todo", 1},
+            {"Try a targeted action", "todo", 2},
+            {"Move a card", "doing", 3},
+            {"Open another browser", "doing", 4},
+            {"Build something together", "done", 5},
+            {"Celebrate the small wins", "done", 6}
+          ] do
+        %{
+          id: Ecto.UUID.bingenerate(),
+          board_id: "public",
+          title: title,
+          column: column,
+          position: position,
+          inserted_at: now,
+          updated_at: now
+        }
+      end
+
+    repo().insert_all("kanban_cards", cards)
   end
 
   def down do
