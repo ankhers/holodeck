@@ -6,6 +6,7 @@ defmodule HolodeckWeb.Components.Kanban.Column do
   prop :cards, :list
   prop :disabled, :boolean
 
+  # Moves hop through Column to demonstrate chained targeted actions; deletes go Card → Board directly.
   def action(:request_move, params, component) do
     put_action(component, name: :request_move, target: "kanban-board", params: params)
   end

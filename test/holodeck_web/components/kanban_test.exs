@@ -31,10 +31,10 @@ defmodule HolodeckWeb.Components.KanbanTest do
     )
   end
 
-  defp settled(component, seq, snapshot, status \\ :ok) do
+  defp settled(component, seq, snapshot, status \\ :ok, operation \\ :move_card) do
     Board.action(
-      :move_settled,
-      %{seq: seq, snapshot: snapshot, status: status, operation: :move_card},
+      :mutation_settled,
+      %{seq: seq, snapshot: snapshot, status: status, operation: operation},
       component
     )
   end
@@ -73,7 +73,7 @@ defmodule HolodeckWeb.Components.KanbanTest do
     assert moving.state.confirmed == snapshot()
     assert moving.state.pending.seq == 1
     assert moving.next_command.name == :move_card
-    assert moving.next_action.name == :move_timeout
+    assert moving.next_action.name == :mutation_timeout
     assert moving.next_action.delay == 10_000
     assert hd(Board.display_cards(moving.state.confirmed, moving.state.pending)).column == "done"
     assert Board.action(:add_card, %{}, moving) == moving
@@ -114,8 +114,11 @@ defmodule HolodeckWeb.Components.KanbanTest do
 
   test "matching success settles; late replies and timeouts cannot clear a newer move" do
     done = snapshot(2, [%{card() | column: "done", version: 2}])
-    result = settled(moving(), 1, done)
+    result = Board.action(:receive_snapshot, %{snapshot: done}, moving())
     assert result.state.pending == nil
+    assert result.state.error == ""
+
+    result = settled(result, 1, done)
     assert result.state.busy == nil
     assert result.state.error == ""
 
@@ -129,11 +132,11 @@ defmodule HolodeckWeb.Components.KanbanTest do
     late = settled(newer, 1, done)
     assert late.state.pending == newer.state.pending
     assert late.state.busy == 2
-    assert Board.action(:move_timeout, %{seq: 1}, newer) == newer
+    assert Board.action(:mutation_timeout, %{seq: 1}, newer) == newer
   end
 
   test "timeout clears and fetches without retry; late response can still advance confirmed" do
-    result = Board.action(:move_timeout, %{seq: 1}, moving())
+    result = Board.action(:mutation_timeout, %{seq: 1}, moving())
     assert result.state.pending == nil
     assert result.state.busy == nil
     assert result.state.error =~ "timed out"
@@ -143,7 +146,7 @@ defmodule HolodeckWeb.Components.KanbanTest do
     assert late.state.error =~ "timed out"
   end
 
-  test "add/delete wait for confirmation, and reset captures the displayed revision" do
+  test "add/delete wait for confirmation, reset captures the displayed revision, and reset conflicts explain it" do
     initial = %{component() | state: Map.put(component().state, :draft_title, "New card")}
     add = Board.action(:add_card, %{}, initial)
     assert add.state.confirmed == initial.state.confirmed
@@ -153,7 +156,12 @@ defmodule HolodeckWeb.Components.KanbanTest do
     reset = Board.action(:confirm_reset, %{}, component())
     assert reset.state.reset_confirmation == 1
     reset = Board.action(:receive_snapshot, %{snapshot: snapshot(2)}, reset)
-    assert Board.action(:reset_board, %{}, reset).next_command.params.expected_revision == 1
+    reset_request = Board.action(:reset_board, %{}, reset)
+    assert reset_request.next_command.params.expected_revision == 1
+
+    reset_conflict = settled(reset_request, 1, snapshot(2), :conflict, :reset_board)
+    assert reset_conflict.state.error == "The board changed; review it and try again."
+    assert reset_conflict.state.reset_confirmation == nil
 
     c = %Component{props: %{card: card(), disabled: false}, state: %{delete_confirmation: false}}
     assert Card.action(:delete, %{}, c) == c
@@ -162,14 +170,20 @@ defmodule HolodeckWeb.Components.KanbanTest do
     assert Card.action(:cancel_delete, %{}, confirmed).state.delete_confirmation == false
   end
 
-  test "commands broadcast success and return full snapshots on conflicts" do
+  test "commands validate their sequence before mutating, broadcast success, and return full snapshots on conflicts" do
     card = hd(Kanban.snapshot().cards)
     params = %{card_id: card.id, expected_version: card.version, destination: "done", seq: 7}
+    before = Kanban.snapshot()
+    malformed = Board.command(:move_card, Map.delete(params, :seq), %Server{})
+    assert malformed.next_action.params.status == :invalid_request
+    assert Kanban.snapshot() == before
+
     success = Board.command(:move_card, params, %Server{})
     assert success.next_action.params.seq == 7
     assert success.next_action.params.status == :ok
     assert length(success.broadcasts) == 1
     assert hd(success.broadcasts).channel == {:kanban, "public"}
+    assert hd(success.broadcasts).except == [{:instance, success.instance_id}]
     failure = Board.command(:move_card, %{params | expected_version: -1}, %Server{})
     assert failure.next_action.params.status == :conflict
     assert failure.broadcasts == []
