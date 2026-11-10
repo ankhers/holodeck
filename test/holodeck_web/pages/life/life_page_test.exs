@@ -59,7 +59,9 @@ defmodule HolodeckWeb.Life.LifePageTest do
   test "speed changes validate, invalidate old ticks and schedule one replacement" do
     playing = act(initial(), :play)
     changed = act(playing, :speed, %{event: %{value: "100"}})
+    assert changed.next_action.name == :tick
     assert changed.next_action.delay == 100
+    assert changed.next_action.params == %{token: changed.state.loop_token}
     assert changed.state.loop_token == playing.state.loop_token + 1
     stale = act(changed, :tick, playing.next_action.params)
     assert stale.state.generation == 0
@@ -69,6 +71,8 @@ defmodule HolodeckWeb.Life.LifePageTest do
     for value <- ["200", "500", "1000"] do
       updated = act(initial(), :speed, %{event: %{value: value}})
       assert updated.state.delay_ms == String.to_integer(value)
+      assert updated.state.loop_token == 1
+      refute updated.state.running
       assert updated.next_action == nil
     end
 
@@ -110,6 +114,21 @@ defmodule HolodeckWeb.Life.LifePageTest do
         :preset -> assert reset.state.cells == Life.preset(params.name)
         :randomise -> assert tuple_size(reset.state.cells) == 576
       end
+    end
+  end
+
+  test "cells toggle while paused without advancing or starting a timer" do
+    paused = initial()
+
+    for id <- [0, 575] do
+      toggled = act(paused, :toggle, %{id: id})
+      assert elem(toggled.state.cells, id) == 1
+      assert toggled.state.population == paused.state.population + 1
+      assert toggled.state.generation == 0
+      assert toggled.state.loop_token == paused.state.loop_token
+      refute toggled.state.running
+      assert toggled.next_action == nil
+      assert act(toggled, :toggle, %{id: id}).state == paused.state
     end
   end
 
