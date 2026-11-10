@@ -9,6 +9,13 @@ defmodule HolodeckWeb.Chat.RoomPageTest do
   test "a missing room renders without loading messages or subscribing" do
     {component, server} = RoomPage.init(%{room_name: "missing"}, %Component{}, %Server{})
 
+    assert component.state.title == "Room not found · Holodeck"
+
+    assert component.state.breadcrumbs == [
+             {"Chat", HolodeckWeb.Chat.LobbyPage},
+             {"Room not found", nil}
+           ]
+
     assert component.state.room == nil
     assert component.state.messages == []
     assert component.state.username == ""
@@ -135,6 +142,13 @@ defmodule HolodeckWeb.Chat.RoomPageTest do
     {:ok, message} = Chat.create_message("Alice", room.id, "Hello")
 
     {component, server} = RoomPage.init(%{room_name: room.name}, %Component{}, %Server{})
+
+    assert component.state.title == "# general · Holodeck"
+
+    assert component.state.breadcrumbs == [
+             {"Chat", HolodeckWeb.Chat.LobbyPage},
+             {"# general", nil}
+           ]
 
     assert component.state.room == room
     assert component.state.messages == [message]

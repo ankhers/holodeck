@@ -3,6 +3,8 @@ defmodule HolodeckWeb.Components.AppShell do
   Shared page chrome with linked breadcrumbs and a default content slot.
 
   Breadcrumbs are `{label, page}` pairs; use `nil` for the current page.
+  A page may also be `{Module, params}`, for example
+  `{"# general", {HolodeckWeb.Chat.RoomPage, room_name: "general"}}`.
   `full_height` preserves the chat room's viewport and scroll regions, while
   `connected` adds the dashboard's status pill. An empty breadcrumb list is home.
   """
@@ -21,14 +23,11 @@ defmodule HolodeckWeb.Components.AppShell do
       <div class={if(@full_height, do: "contents", else: "relative z-[1] max-w-[1180px] mx-auto px-6 pb-12")}>
         <nav aria-label="Breadcrumb" class={nav_class(@full_height, @breadcrumbs, @connected)}>
           <div class="flex items-center gap-2.5 text-[15px] font-semibold tracking-[-0.01em]">
-            {%if @breadcrumbs == []}
+            <Hologram.UI.Link to={HolodeckWeb.HomePage} class="flex items-center gap-2.5 no-underline text-base-content">
               <div class="hd-logo-icon w-7 h-7 rounded-[7px] flex items-center justify-center text-sm font-bold text-white shrink-0">H</div>
-              Holodeck
-            {%else}
-              <Hologram.UI.Link to={HolodeckWeb.HomePage} aria-label="Home" class="flex items-center gap-2.5 no-underline text-base-content">
-                <div class="hd-logo-icon w-7 h-7 rounded-[7px] flex items-center justify-center text-sm font-bold text-white shrink-0">H</div>
-                Home
-              </Hologram.UI.Link>
+              {if(@breadcrumbs == [], do: "Holodeck", else: "Home")}
+            </Hologram.UI.Link>
+            {%if @breadcrumbs != []}
               {%for {label, page} <- @breadcrumbs}
                 <span class="text-base-content/50 mx-px">/</span>
                 {%if page}
@@ -57,7 +56,15 @@ defmodule HolodeckWeb.Components.AppShell do
 
   def nav_class(false, breadcrumbs, connected) do
     margin = if breadcrumbs == [], do: "mb-12", else: "mb-6"
-    alignment = if connected, do: "justify-between", else: ""
-    "flex items-center #{alignment} py-[18px] #{margin} border-b border-white/[0.08]"
+
+    [
+      "flex items-center",
+      if(connected, do: "justify-between"),
+      "py-[18px]",
+      margin,
+      "border-b border-white/[0.08]"
+    ]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join(" ")
   end
 end

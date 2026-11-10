@@ -7,6 +7,7 @@ defmodule HolodeckWeb.Chat.RoomPage do
   route "/chat/:room_name"
   param :room_name, :string
 
+  # Page state from init/3 overrides this layout prop with the room-specific title.
   layout HolodeckWeb.Layout, title: "Chat room · Holodeck"
 
   def init(params, component, server) do
@@ -18,6 +19,10 @@ defmodule HolodeckWeb.Chat.RoomPage do
       put_state(component,
         messages: messages,
         room: room,
+        breadcrumbs: [
+          {"Chat", HolodeckWeb.Chat.LobbyPage},
+          {if(room, do: "# #{room.name}", else: "Room not found"), nil}
+        ],
         username: username,
         draft: "",
         title: if(room, do: "# #{room.name} · Holodeck", else: "Room not found · Holodeck")

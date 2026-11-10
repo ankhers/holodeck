@@ -1,47 +1,47 @@
-<HolodeckWeb.Components.AppShell breadcrumbs={[{"Polls", HolodeckWeb.Poll.PollPage}, {"Results", nil}]}>
+<HolodeckWeb.Components.AppShell breadcrumbs={@breadcrumbs}>
 
-    <div class="max-w-[560px] mx-auto">
+  <div class="max-w-[560px] mx-auto">
 
-      {%if @poll}
-        <div class="text-base-content/35 text-[11px] uppercase tracking-[1px] mb-2.5 font-mono">Poll Results</div>
+    {%if @poll}
+      <div class="text-base-content/35 text-[11px] uppercase tracking-[1px] mb-2.5 font-mono">Poll Results</div>
 
-        <div class="bg-base-300 border border-white/20 rounded-lg px-5 py-5 flex flex-col gap-5">
+      <div class="bg-base-300 border border-white/20 rounded-lg px-5 py-5 flex flex-col gap-5">
 
-          <div class="text-[15px] font-semibold text-base-content tracking-[-0.01em]">{@poll.question}</div>
+        <div class="text-[15px] font-semibold text-base-content tracking-[-0.01em]">{@poll.question}</div>
 
-          <!-- Hologram JS interop initializes Chart.js and updates its shared vote buffer. -->
-          <div class="relative h-[280px]">
-            <canvas id="poll-results-chart"></canvas>
-          </div>
-
-          <hr class="border-0 border-t border-white/[0.08]" />
-
-          <!-- No-JS fallback / accessible summary: renders meaningfully before chart.js loads -->
-          <div class="flex flex-col gap-3">
-            {%for {n, label} <- [{1, @poll.answer_1}, {2, @poll.answer_2}, {3, @poll.answer_3}, {4, @poll.answer_4}]}
-              <div class="flex items-center gap-2.5">
-                <span class="text-base-content/75 text-[12px] font-mono w-[120px] shrink-0 truncate">{label}</span>
-                <div class="flex-1 h-[7px] rounded-full bg-white/[0.06] overflow-hidden">
-                  <div style="height: 100%; border-radius: 99px; background: var(--color-primary, #6366f1); width: {Map.get(@frequencies, n, 0) / max(length(@answers), 1) * 100}%;"></div>
-                </div>
-                <span class="text-base-content/50 text-[11px] font-mono w-[34px] text-right">{Map.get(@frequencies, n, 0)}</span>
-              </div>
-            {/for}
-          </div>
-
-          <div class="text-base-content/35 text-[11px] uppercase tracking-[1px] font-mono text-right">{length(@answers)} votes</div>
-
+        <!-- Hologram JS interop initializes Chart.js and updates its shared vote buffer. -->
+        <div class="relative h-[280px]">
+          <canvas id="poll-results-chart"></canvas>
         </div>
 
-        <p class="text-base-content/50 text-[12px] text-center mt-4">
-          Haven't voted yet? Head to the
-          <Hologram.UI.Link to={HolodeckWeb.Poll.VotePage, poll_id: @poll.id} class="text-primary no-underline hover:underline">vote page</Hologram.UI.Link>
-          to cast your vote.
-        </p>
-      {%else}
-        <h1 class="text-[15px] font-semibold mb-3">Poll not found</h1>
-        <Hologram.UI.Link to={HolodeckWeb.Poll.PollPage} class="text-primary hover:underline">Create a poll</Hologram.UI.Link>
-      {/if}
+        <hr class="border-0 border-t border-white/[0.08]" />
 
-    </div>
+        <!-- No-JS fallback / accessible summary: renders meaningfully before chart.js loads -->
+        <div class="flex flex-col gap-3">
+          {%for {n, label} <- [{1, @poll.answer_1}, {2, @poll.answer_2}, {3, @poll.answer_3}, {4, @poll.answer_4}]}
+            <div class="flex items-center gap-2.5">
+              <span class="text-base-content/75 text-[12px] font-mono w-[120px] shrink-0 truncate">{label}</span>
+              <div class="flex-1 h-[7px] rounded-full bg-white/[0.06] overflow-hidden">
+                <div style="height: 100%; border-radius: 99px; background: var(--color-primary, #6366f1); width: {Map.get(@frequencies, n, 0) / max(length(@answers), 1) * 100}%;"></div>
+              </div>
+              <span class="text-base-content/50 text-[11px] font-mono w-[34px] text-right">{Map.get(@frequencies, n, 0)}</span>
+            </div>
+          {/for}
+        </div>
+
+        <div class="text-base-content/35 text-[11px] uppercase tracking-[1px] font-mono text-right">{length(@answers)} votes</div>
+
+      </div>
+
+      <p class="text-base-content/50 text-[12px] text-center mt-4">
+        Haven't voted yet? Head to the
+        <Hologram.UI.Link to={HolodeckWeb.Poll.VotePage, poll_id: @poll.id} class="text-primary no-underline hover:underline">vote page</Hologram.UI.Link>
+        to cast your vote.
+      </p>
+    {%else}
+      <h1 class="text-[15px] font-semibold mb-3">Poll not found</h1>
+      <Hologram.UI.Link to={HolodeckWeb.Poll.PollPage} class="text-primary hover:underline">Create a poll</Hologram.UI.Link>
+    {/if}
+
+  </div>
 </HolodeckWeb.Components.AppShell>

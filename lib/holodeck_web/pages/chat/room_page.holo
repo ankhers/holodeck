@@ -1,4 +1,4 @@
-<HolodeckWeb.Components.AppShell breadcrumbs={[{"Chat", HolodeckWeb.Chat.LobbyPage}, {if(@room, do: "# " <> @room.name, else: "Room not found"), nil}]} full_height={true}>
+<HolodeckWeb.Components.AppShell breadcrumbs={@breadcrumbs} full_height={true}>
 
   {%if @room == nil}
     <div id="room-not-found" class="relative z-[1] p-6">

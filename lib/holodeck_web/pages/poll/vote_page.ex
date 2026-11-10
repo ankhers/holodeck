@@ -13,7 +13,14 @@ defmodule HolodeckWeb.Poll.VotePage do
   def init(params, component, _server) do
     poll = Polls.get_poll(params.poll_id)
 
-    put_state(component, poll: poll)
+    put_state(component,
+      poll: poll,
+      title: if(poll, do: "Vote · Holodeck", else: "Poll not found · Holodeck"),
+      breadcrumbs: [
+        {"Polls", HolodeckWeb.Poll.PollPage},
+        {if(poll, do: "Vote", else: "Poll not found"), nil}
+      ]
+    )
   end
 
   def action(:vote, params, component) do

@@ -20,14 +20,23 @@ defmodule HolodeckWeb.Poll.ResultPage do
 
       component =
         component
-        |> put_state(poll: poll, answers: answers, frequencies: %{})
+        |> put_state(
+          poll: poll,
+          answers: answers,
+          frequencies: %{},
+          breadcrumbs: [{"Polls", HolodeckWeb.Poll.PollPage}, {"Results", nil}]
+        )
         |> put_action(:init_chart)
 
       server = put_subscription(server, {:poll_result, poll.id})
 
       {component, server}
     else
-      {put_state(component, poll: nil), server}
+      {put_state(component,
+         poll: nil,
+         title: "Poll not found · Holodeck",
+         breadcrumbs: [{"Polls", HolodeckWeb.Poll.PollPage}, {"Poll not found", nil}]
+       ), server}
     end
   end
 
