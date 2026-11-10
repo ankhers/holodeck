@@ -41,7 +41,48 @@ defmodule HolodeckWeb.Poll.PageChromeTest do
 
     {visitor_results, _} = ResultPage.init(%{poll_id: poll.id}, %Component{}, %Server{})
     refute visitor_results.state.voted?
-    assert length(PollPage.init(%{}, %Component{}, %Server{}).state.recent_polls) == 1
+    {polls_page, polls_server} = PollPage.init(%{}, %Component{}, %Server{})
+    assert length(polls_page.state.recent_polls) == 1
+    assert polls_server.subscriptions == [{Polls.recent_channel(), nil}]
+  end
+
+  test "creating a poll broadcasts it to the recent polls list" do
+    params = %{
+      event: %{
+        "question" => "Ready?",
+        "answer_1" => "A",
+        "answer_2" => "B",
+        "answer_3" => "C",
+        "answer_4" => "D"
+      }
+    }
+
+    result = PollPage.command(:create_poll, params, %Server{})
+
+    assert [broadcast] = result.broadcasts
+    assert broadcast.channel == Polls.recent_channel()
+    assert broadcast.action_name == :poll_added
+    assert broadcast.params.entry.vote_count == 0
+    assert broadcast.params.entry.poll == result.next_action.params.poll
+  end
+
+  test "the recent polls list adds new polls, keeps ten, and counts live votes" do
+    entries = for n <- 1..10, do: %{poll: %{id: "poll-#{n}"}, vote_count: n}
+    component = %Component{state: %{recent_polls: entries}}
+    new_entry = %{poll: %{id: "new"}, vote_count: 0}
+
+    added = PollPage.action(:poll_added, %{entry: new_entry}, component)
+    assert hd(added.state.recent_polls) == new_entry
+    assert length(added.state.recent_polls) == 10
+    refute Enum.any?(added.state.recent_polls, &(&1.poll.id == "poll-10"))
+    assert PollPage.action(:poll_added, %{entry: new_entry}, added) == added
+
+    voted = PollPage.action(:vote_recorded, %{poll_id: "poll-2"}, added)
+    assert Enum.find(voted.state.recent_polls, &(&1.poll.id == "poll-2")).vote_count == 3
+    assert Enum.find(voted.state.recent_polls, &(&1.poll.id == "poll-1")).vote_count == 1
+
+    # Votes on polls that have dropped off the list change nothing.
+    assert PollPage.action(:vote_recorded, %{poll_id: "elsewhere"}, voted) == voted
   end
 
   test "vote history retains only the most recent forty poll ids" do

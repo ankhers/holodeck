@@ -5,13 +5,40 @@ defmodule HolodeckWeb.Chat.LobbyPageTest do
   alias Hologram.Server
   alias HolodeckWeb.Chat.LobbyPage
 
-  test "the lobby loads the session username" do
-    component =
+  test "the lobby loads the session username and subscribes to new rooms" do
+    {component, server} =
       LobbyPage.init(%{}, %Component{}, %Server{
         session: %{"holodeck_chat_username" => "Alice"}
       })
 
     assert component.state.username == "Alice"
+    assert server.subscriptions == [{{:chat, "rooms"}, nil}]
+  end
+
+  test "creating a room broadcasts it to every lobby before opening it" do
+    result =
+      LobbyPage.command(:create_room, %{room_name: "general"}, %Server{
+        session: %{"holodeck_chat_username" => "Alice"}
+      })
+
+    assert [broadcast] = result.broadcasts
+    assert broadcast.channel == {:chat, "rooms"}
+    assert broadcast.action_name == :room_added
+    assert broadcast.params.room.name == "general"
+    assert result.next_action.name == :room_created
+  end
+
+  test "added rooms are listed once, in name order" do
+    alpha = %{id: "1", name: "alpha"}
+    gamma = %{id: "3", name: "gamma"}
+    beta = %{id: "2", name: "beta"}
+    component = %Component{state: %{rooms: [alpha, gamma]}}
+
+    added = LobbyPage.action(:room_added, %{room: beta}, component)
+    assert added.state.rooms == [alpha, beta, gamma]
+
+    # The creator's own lobby also receives the broadcast; repeats are ignored.
+    assert LobbyPage.action(:room_added, %{room: beta}, added).state.rooms == [alpha, beta, gamma]
   end
 
   test "saving a username trims and persists it before updating the display" do

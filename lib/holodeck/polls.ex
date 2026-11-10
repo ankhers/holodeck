@@ -5,6 +5,9 @@ defmodule Holodeck.Polls do
 
   import Ecto.Query
 
+  @doc "Channel for changes to the recent polls list: new polls and vote counts."
+  def recent_channel, do: {:polls, "recent"}
+
   def create_poll(params) do
     %Poll{}
     |> Poll.create_changeset(params)
@@ -44,6 +47,7 @@ defmodule Holodeck.Polls do
 
       with {:ok, r} <- result do
         Hologram.Realtime.broadcast_action({:poll_result, uuid}, :update_results, result: r)
+        Hologram.Realtime.broadcast_action(recent_channel(), :vote_recorded, poll_id: uuid)
         result
       end
     else

@@ -15,7 +15,9 @@ defmodule HolodeckWeb.Chat.LobbyPage do
 
     username = get_session(server, "holodeck_chat_username", "")
 
-    put_state(component, rooms: rooms, username: username)
+    # Every lobby hears about new rooms, so the list stays current without a reload.
+    {put_state(component, rooms: rooms, username: username),
+     put_subscription(server, {:chat, "rooms"})}
   end
 
   def action(:create_room, params, component) do
@@ -24,6 +26,14 @@ defmodule HolodeckWeb.Chat.LobbyPage do
 
   def action(:room_created, params, component) do
     put_page(component, RoomPage, room_name: params.room.name)
+  end
+
+  def action(:room_added, params, component) do
+    rooms =
+      [params.room | Enum.reject(component.state.rooms, &(&1.id == params.room.id))]
+      |> Enum.sort_by(& &1.name)
+
+    put_state(component, :rooms, rooms)
   end
 
   def action(:save_username, params, component) do
@@ -45,7 +55,9 @@ defmodule HolodeckWeb.Chat.LobbyPage do
 
     case Chat.create_room(params.room_name, username) do
       {:ok, room} ->
-        put_action(server, :room_created, room: room)
+        server
+        |> put_broadcast({:chat, "rooms"}, :room_added, room: room)
+        |> put_action(:room_created, room: room)
 
       {:error, changeset} ->
         put_action(server,

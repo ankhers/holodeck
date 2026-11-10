@@ -28,10 +28,10 @@
             <p class="p-4 text-[13px] text-base-content/50">No polls yet. Start the conversation above.</p>
           {/if}
           {%for entry <- @recent_polls}
-            <article class="p-4 min-w-0">
+            <article id={"recent-poll-" <> entry.poll.id} class="p-4 min-w-0">
               <h3 class="text-[13px] font-semibold break-words">{entry.poll.question}</h3>
               <div class="flex flex-wrap items-center gap-3 mt-3 text-[12px] font-mono">
-                <span class="text-base-content/50">{entry.vote_count} {if entry.vote_count == 1 do "vote" else "votes" end}</span>
+                <span class="text-base-content/50" data-vote-count={entry.vote_count}>{entry.vote_count} {if entry.vote_count == 1 do "vote" else "votes" end}</span>
                 <Hologram.UI.Link to={HolodeckWeb.Poll.ResultPage, poll_id: entry.poll.id} class="text-primary hover:underline">Results</Hologram.UI.Link>
                 <Hologram.UI.Link to={HolodeckWeb.Poll.VotePage, poll_id: entry.poll.id} class="text-primary hover:underline">Vote</Hologram.UI.Link>
               </div>
