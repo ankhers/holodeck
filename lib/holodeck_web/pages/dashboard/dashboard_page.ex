@@ -23,7 +23,8 @@ defmodule HolodeckWeb.Dashboard.DashboardPage do
         log_msgs: [],
         metrics_status: :live,
         last_tick_at: nil,
-        last_tick_request_at: nil
+        last_tick_request_at: nil,
+        tick_seq: 0
       )
       |> put_action(:start_monitoring)
 
@@ -47,9 +48,9 @@ defmodule HolodeckWeb.Dashboard.DashboardPage do
   def action(:start_monitoring, _params, component) do
     now = System.monotonic_time(:millisecond)
 
-    component
-    |> put_state(last_tick_at: now, last_tick_request_at: now)
-    |> put_command(:tick)
+    component = put_state(component, last_tick_at: now)
+
+    action(:tick, %{}, component)
     |> put_action(name: :watchdog, delay: 1_000)
   end
 
@@ -71,19 +72,27 @@ defmodule HolodeckWeb.Dashboard.DashboardPage do
   end
 
   def action(:tick, _params, component) do
+    seq = component.state.tick_seq + 1
+
     component
-    |> put_state(last_tick_request_at: System.monotonic_time(:millisecond))
-    |> put_command(:tick)
+    |> put_state(tick_seq: seq, last_tick_request_at: System.monotonic_time(:millisecond))
+    |> put_command(:tick, %{seq: seq})
   end
 
-  def action(:tick_update, params, component) do
-    component
-    |> put_state(
-      system_metrics: params,
-      last_tick_at: System.monotonic_time(:millisecond),
-      metrics_status: :live
-    )
-    |> put_action(name: :tick, delay: @tick_delay)
+  def action(:tick_update, %{seq: seq, metrics: metrics}, component) do
+    component =
+      put_state(component,
+        system_metrics: metrics,
+        last_tick_at: System.monotonic_time(:millisecond),
+        metrics_status: :live
+      )
+
+    # Superseded responses may refresh metrics, but only the latest request continues the loop.
+    if seq == component.state.tick_seq do
+      put_action(component, name: :tick, delay: @tick_delay)
+    else
+      component
+    end
   end
 
   def action(:store_metrics, system_metrics, component) do
@@ -102,12 +111,12 @@ defmodule HolodeckWeb.Dashboard.DashboardPage do
 
   def command(:process_sort, _params, server), do: server
 
-  def command(:tick, _params, server) do
+  def command(:tick, %{seq: seq}, server) do
     process_sort = saved_sort(server)
 
     system_metrics = Dashboard.system_metrics(process_sort: process_sort)
 
-    put_action(server, :tick_update, system_metrics)
+    put_action(server, :tick_update, %{seq: seq, metrics: system_metrics})
   end
 
   def normalize_sort(value) when value in [:memory, "memory"], do: :memory

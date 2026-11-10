@@ -21,8 +21,8 @@ defmodule HolodeckWeb.Dashboard.DashboardPageTest do
       assert result.next_action.name == :store_metrics
       assert_sorted(result.next_action.params, by)
 
-      tick = DashboardPage.command(:tick, %{}, result)
-      assert_sorted(tick.next_action.params, by)
+      tick = DashboardPage.command(:tick, %{seq: 1}, result)
+      assert_sorted(tick.next_action.params.metrics, by)
     end
   end
 
@@ -48,18 +48,21 @@ defmodule HolodeckWeb.Dashboard.DashboardPageTest do
   test "tick normalizes atom, string and unknown session sorts" do
     for {saved, by} <- sort_values() ++ [{"unknown", :memory}, {nil, :memory}, {%{}, :memory}] do
       server = %Server{session: %{"holodeck_dashboard_process_sort" => saved}}
-      result = DashboardPage.command(:tick, %{}, server)
+      result = DashboardPage.command(:tick, %{seq: 7}, server)
       assert result.next_action.name == :tick_update
-      assert_sorted(result.next_action.params, by)
+      assert result.next_action.params.seq == 7
+      assert_sorted(result.next_action.params.metrics, by)
     end
   end
 
   test "monitoring initializes its timestamps in the client action, not during SSR" do
     before = System.monotonic_time(:millisecond)
-    result = DashboardPage.action(:start_monitoring, %{}, %Component{})
+    result = DashboardPage.action(:start_monitoring, %{}, %Component{state: %{tick_seq: 0}})
     assert result.state.last_tick_at >= before
-    assert result.state.last_tick_at == result.state.last_tick_request_at
+    assert result.state.last_tick_request_at >= result.state.last_tick_at
     assert result.next_command.name == :tick
+    assert result.state.tick_seq == 1
+    assert result.next_command.params == %{seq: 1}
     assert result.next_action.name == :watchdog
     assert result.next_action.delay == 1_000
   end
@@ -69,12 +72,14 @@ defmodule HolodeckWeb.Dashboard.DashboardPageTest do
 
     result =
       DashboardPage.action(:watchdog, %{}, %Component{
-        state: %{last_tick_at: now - 16_000, last_tick_request_at: now - 6_000}
+        state: %{last_tick_at: now - 16_000, last_tick_request_at: now - 6_000, tick_seq: 1}
       })
 
     assert result.state.metrics_status == :stale
     assert result.next_command.name == :tick
     assert result.state.last_tick_request_at >= now
+    assert result.state.tick_seq == 2
+    assert result.next_command.params == %{seq: 2}
     assert result.next_action.name == :watchdog
     assert result.next_action.delay == 1_000
 
@@ -87,8 +92,8 @@ defmodule HolodeckWeb.Dashboard.DashboardPageTest do
     before = System.monotonic_time(:millisecond)
 
     result =
-      DashboardPage.action(:tick_update, %{sample: :fresh}, %Component{
-        state: %{metrics_status: :stale}
+      DashboardPage.action(:tick_update, %{seq: 1, metrics: %{sample: :fresh}}, %Component{
+        state: %{metrics_status: :stale, tick_seq: 1}
       })
 
     assert result.state.metrics_status == :live
@@ -101,6 +106,38 @@ defmodule HolodeckWeb.Dashboard.DashboardPageTest do
     assert watching.state.metrics_status == :live
     assert watching.next_command == nil
     assert watching.next_action.name == :watchdog
+  end
+
+  test "slow and retried responses refresh metrics but schedule exactly one next tick" do
+    first = DashboardPage.action(:tick, %{}, %Component{state: %{tick_seq: 0}})
+    retry = DashboardPage.action(:tick, %{}, %{first | next_command: nil})
+    assert first.next_command.params.seq == 1
+    assert retry.next_command.params.seq == 2
+
+    for responses <- [[1, 2], [2, 1]] do
+      {_, scheduled} =
+        Enum.reduce(responses, {%{retry | next_command: nil}, []}, fn seq,
+                                                                      {component, scheduled} ->
+          # The runtime consumes next_action before dispatching the following response.
+          component = %{component | next_action: nil}
+          params = %{seq: seq, metrics: %{sample: seq}}
+          result = DashboardPage.action(:tick_update, params, component)
+          assert result.state.system_metrics == params.metrics
+          assert result.state.metrics_status == :live
+          assert result.state.tick_seq == 2
+
+          if seq == 1 do
+            assert result.next_action == nil
+          else
+            assert result.next_action.name == :tick
+            assert result.next_action.delay == 5_000
+          end
+
+          {result, [result.next_action | scheduled]}
+        end)
+
+      assert Enum.count(scheduled, &(&1 != nil)) == 1
+    end
   end
 
   test "freshness boundary uses three missed five-second intervals" do
