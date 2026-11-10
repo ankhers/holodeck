@@ -42,7 +42,7 @@ defmodule HolodeckWeb.Components.KanbanTest do
   test "only the board subscribes and mount queues a fresh snapshot" do
     {board, server} = Board.init(%{}, %Component{}, %Server{})
     assert board.state.confirmed == Kanban.snapshot()
-    assert board.next_action.name == :sync
+    assert board.next_action.name == :mount_drag_drop
     assert length(server.subscriptions) == 1
     assert Board.action(:sync, %{}, board).next_command.name == :snapshot
 

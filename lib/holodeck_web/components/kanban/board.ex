@@ -1,7 +1,10 @@
 defmodule HolodeckWeb.Components.Kanban.Board do
   use HolodeckWeb, :component
+  use Hologram.JS
 
   alias Holodeck.Kanban
+
+  js_import :install, from: "./drag_drop.js", as: :install_drag_drop
 
   def init(_props, component, server) do
     component =
@@ -16,9 +19,14 @@ defmodule HolodeckWeb.Components.Kanban.Board do
         status: "",
         reset_confirmation: nil
       )
-      |> put_action(:sync)
+      |> put_action(:mount_drag_drop)
 
     {component, put_subscription(server, {:kanban, "public"})}
+  end
+
+  def action(:mount_drag_drop, _params, component) do
+    JS.call(:install_drag_drop, ["kanban-board-root", "kanban-board"])
+    put_command(component, :snapshot)
   end
 
   def action(:sync, _params, component), do: put_command(component, :snapshot)
