@@ -44,6 +44,56 @@ defmodule HolodeckWeb.Poll.PageChromeTest do
     assert length(PollPage.init(%{}, %Component{}, %Server{}).state.recent_polls) == 1
   end
 
+  test "vote history retains only the most recent forty poll ids" do
+    Holodeck.HologramHelpers.ensure_pubsub_started()
+
+    {:ok, poll} =
+      Polls.create_poll(%{
+        question: "Ready?",
+        answer_1: "A",
+        answer_2: "B",
+        answer_3: "C",
+        answer_4: "D"
+      })
+
+    history = for _ <- 1..45, do: Ecto.UUID.generate()
+    server = %Server{session: %{"voted_poll_ids" => history}}
+
+    updated = VotePage.command(:vote, %{poll_id: poll.id, answer_number: 1}, server)
+
+    assert updated.session["voted_poll_ids"] == [poll.id | Enum.take(history, 39)]
+    assert length(updated.session["voted_poll_ids"]) == 40
+  end
+
+  test "a session cannot submit another vote and the vote page remembers it" do
+    Holodeck.HologramHelpers.ensure_pubsub_started()
+
+    {:ok, poll} =
+      Polls.create_poll(%{
+        question: "Ready?",
+        answer_1: "A",
+        answer_2: "B",
+        answer_3: "C",
+        answer_4: "D"
+      })
+
+    params = %{poll_id: poll.id, answer_number: 1}
+    server = VotePage.command(:vote, params, %Server{})
+    repeated = VotePage.command(:vote, %{params | answer_number: 2}, server)
+
+    assert length(Polls.get_answers_for(poll.id)) == 1
+    assert repeated.next_action.name == :show
+    assert repeated.next_action.target == "toast"
+
+    assert repeated.next_action.params == %{
+             message: "You've already voted on this poll",
+             variant: :info
+           }
+
+    assert VotePage.init(%{poll_id: poll.id}, %Component{}, repeated).state.voted?
+    refute VotePage.init(%{poll_id: poll.id}, %Component{}, %Server{}).state.voted?
+  end
+
   test "invalid votes do not mark the session as voted" do
     server = VotePage.command(:vote, %{poll_id: "invalid", answer_number: 1}, %Server{})
     refute Map.has_key?(server.session, "voted_poll_ids")
