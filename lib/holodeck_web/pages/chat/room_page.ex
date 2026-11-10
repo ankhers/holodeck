@@ -29,13 +29,19 @@ defmodule HolodeckWeb.Chat.RoomPage do
     username = component.state.username
     room = component.state.room
 
-    component
-    |> put_command(:send_message, %{
+    put_command(component, :send_message, %{
       username: username,
       room: room,
       message: component.state.draft
     })
-    |> put_state(:draft, "")
+  end
+
+  def action(:message_sent, params, component) do
+    if component.state.draft == params.message do
+      put_state(component, :draft, "")
+    else
+      component
+    end
   end
 
   def action(:add_message, params, component) do
@@ -45,11 +51,20 @@ defmodule HolodeckWeb.Chat.RoomPage do
   def command(:send_message, params, server) do
     case Holodeck.Chat.create_message(params.username, params.room.id, params.message) do
       {:ok, message} ->
-        put_broadcast(server, {:chat_room, params.room.name}, :add_message, message: message)
-
-      {:error, reason} ->
-        # TODO: Show error message
         server
+        |> put_broadcast({:chat_room, params.room.name}, :add_message, message: message)
+        |> put_action(:message_sent, message: params.message)
+
+      {:error, _changeset} ->
+        put_action(server,
+          name: :show,
+          target: "toast",
+          params: %{
+            message:
+              "Message could not be sent. Set a username in the lobby and enter a message.",
+            variant: :error
+          }
+        )
     end
   end
 
