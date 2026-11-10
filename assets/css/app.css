@@ -137,6 +137,33 @@
 
 /* This file is for your main application CSS */
 
+/* Shared Kanban: custom controls, with native keyboard and touch alternatives. */
+.hd-kanban-button {
+  appearance: none;
+  border: 1px solid color-mix(in oklch, var(--color-base-content) 15%, transparent);
+  border-radius: 6px;
+  padding: 7px 10px;
+  background: transparent;
+  color: var(--color-base-content);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease, opacity 150ms ease;
+}
+.hd-kanban-button:hover:not(:disabled) {
+  background: color-mix(in oklch, var(--color-primary) 10%, transparent);
+  border-color: color-mix(in oklch, var(--color-primary) 50%, transparent);
+}
+.hd-kanban-button:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.hd-kanban-button:disabled { opacity: 0.45; cursor: not-allowed; }
+.hd-kanban-button-primary { background: var(--color-primary); color: var(--color-primary-content); }
+.hd-kanban-card[draggable="true"] { cursor: grab; transition: border-color 150ms ease, box-shadow 150ms ease; }
+.hd-kanban-card[draggable="true"]:hover { border-color: color-mix(in oklch, var(--color-primary) 45%, transparent); box-shadow: 0 4px 16px #0002; }
+.hd-kanban-card[draggable="true"]:active { cursor: grabbing; }
+.hd-kanban-board[aria-busy="true"] .hd-kanban-column { opacity: 0.8; }
+@media (prefers-reduced-motion: reduce) {
+  .hd-kanban-button, .hd-kanban-card { transition: none; }
+}
+
 /* Dashboard specifics */
 .hd-sort-btn { appearance: none; font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 4px; cursor: pointer; border: 1px solid rgba(255,255,255,0.08); color: rgba(194,194,194,0.5); background: transparent; box-shadow: none; }
 .hd-sort-btn-active { appearance: none; font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 4px; cursor: pointer; border: 1px solid rgba(167,139,250,0.3); color: #a78bfa; background: rgba(167,139,250,0.12); box-shadow: none; }

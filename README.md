@@ -89,6 +89,19 @@ Create, vote on, and watch the results of simple polls.
 - Each new vote is broadcast over a `{:poll_result, poll_id}` subscription, so
   anyone watching the results sees the chart move as votes come in.
 
+### Shared Kanban — `/kanban`
+
+Move cards together on one public board.
+
+- Cards and fixed columns are nested stateful components with independent cids;
+  move actions deliberately hop Card → Column → Board to demonstrate targeted
+  action chains.
+- A board-row transaction serializes the 30-card cap, optimistic version checks,
+  append-only cross-column moves, and revisioned reset. Successful mutations
+  broadcast a full snapshot to other browser instances.
+- Native drag-and-drop is a small `Hologram.JS` module. Keyboard and touch users
+  have equivalent labeled Move controls, delete confirmation, and focus recovery.
+
 ## Project layout
 
 ```

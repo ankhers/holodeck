@@ -1,0 +1,3 @@
+<HolodeckWeb.Components.AppShell breadcrumbs={[{"Shared Kanban", nil}]}>
+  <HolodeckWeb.Components.Kanban.Board cid="kanban-board" />
+</HolodeckWeb.Components.AppShell>
