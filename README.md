@@ -119,8 +119,11 @@ environment. The partition isolates the browser suite's database. The endpoint
 uses port 4002 from `config/test.exs`, ignoring `PORT`; make sure it is free.
 No separate application server is needed.
 
-`E2E=1` includes the browser tests, enables the test endpoint, and calls the public
-`Hologram.Test.setup()` to compile browser assets and start Hologram. Wallaby and
+`E2E=1` includes the browser tests, enables the test endpoint, builds Tailwind CSS
+with `mix assets.build`, and calls the public `Hologram.Test.setup()` to compile
+Hologram browser assets and start Hologram. CSS is built on every opt-in run so
+fresh checkouts exercise the same styling as development. Plain `mix test` skips
+both asset builds. Wallaby and
 the matching Chromium / chromedriver pair from `devenv.nix` (Linux) are only
 started for this opt-in run. On other platforms, install a matching Chromium
 (`chromium` on PATH) and chromedriver pair yourself. Tests

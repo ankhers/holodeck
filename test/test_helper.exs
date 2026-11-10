@@ -3,6 +3,7 @@ ExUnit.start(exclude: if(e2e?, do: [], else: [:e2e]))
 Ecto.Adapters.SQL.Sandbox.mode(Holodeck.Repo, :manual)
 
 if e2e? do
+  Mix.Task.run("assets.build")
   {:ok, _} = Hologram.Test.setup()
   Application.put_env(:wallaby, :driver, Wallaby.Chrome)
   port = HolodeckWeb.Endpoint.config(:http)[:port]
