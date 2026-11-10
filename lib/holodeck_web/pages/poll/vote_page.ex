@@ -15,7 +15,7 @@ defmodule HolodeckWeb.Poll.VotePage do
 
     put_state(component,
       poll: poll,
-      voted?: params.poll_id in get_session(server, :voted_poll_ids, []),
+      voted?: params.poll_id in get_session(server, "holodeck_voted_poll_ids", []),
       title: if(poll, do: "Vote · Holodeck", else: "Poll not found · Holodeck"),
       breadcrumbs: [
         {"Polls", HolodeckWeb.Poll.PollPage},
@@ -37,7 +37,7 @@ defmodule HolodeckWeb.Poll.VotePage do
 
   def command(:vote, params, server) do
     # Demo-only session protection: clearing cookies (or aging out of history) allows another vote.
-    if params.poll_id in get_session(server, :voted_poll_ids, []) do
+    if params.poll_id in get_session(server, "holodeck_voted_poll_ids", []) do
       put_action(server,
         name: :show,
         target: "toast",
@@ -52,12 +52,12 @@ defmodule HolodeckWeb.Poll.VotePage do
     case Polls.vote(params.poll_id, params.answer_number) do
       {:ok, _result} ->
         voted_poll_ids =
-          [params.poll_id | get_session(server, :voted_poll_ids, [])]
+          [params.poll_id | get_session(server, "holodeck_voted_poll_ids", [])]
           |> Enum.uniq()
           |> Enum.take(40)
 
         server
-        |> put_session(:voted_poll_ids, voted_poll_ids)
+        |> put_session("holodeck_voted_poll_ids", voted_poll_ids)
         |> put_action(:vote_complete)
 
       {:error, _reason} ->

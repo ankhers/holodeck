@@ -32,7 +32,7 @@ defmodule HolodeckWeb.Poll.PageChromeTest do
       })
 
     server = VotePage.command(:vote, %{poll_id: poll.id, answer_number: 2}, %Server{})
-    assert server.session["voted_poll_ids"] == [poll.id]
+    assert server.session["holodeck_voted_poll_ids"] == [poll.id]
 
     {results, _} = ResultPage.init(%{poll_id: poll.id}, %Component{}, server)
     assert results.state.frequencies == %{2 => 1}
@@ -57,12 +57,12 @@ defmodule HolodeckWeb.Poll.PageChromeTest do
       })
 
     history = for _ <- 1..45, do: Ecto.UUID.generate()
-    server = %Server{session: %{"voted_poll_ids" => history}}
+    server = %Server{session: %{"holodeck_voted_poll_ids" => history}}
 
     updated = VotePage.command(:vote, %{poll_id: poll.id, answer_number: 1}, server)
 
-    assert updated.session["voted_poll_ids"] == [poll.id | Enum.take(history, 39)]
-    assert length(updated.session["voted_poll_ids"]) == 40
+    assert updated.session["holodeck_voted_poll_ids"] == [poll.id | Enum.take(history, 39)]
+    assert length(updated.session["holodeck_voted_poll_ids"]) == 40
   end
 
   test "a session cannot submit another vote and the vote page remembers it" do
@@ -96,7 +96,7 @@ defmodule HolodeckWeb.Poll.PageChromeTest do
 
   test "invalid votes do not mark the session as voted" do
     server = VotePage.command(:vote, %{poll_id: "invalid", answer_number: 1}, %Server{})
-    refute Map.has_key?(server.session, "voted_poll_ids")
+    refute Map.has_key?(server.session, "holodeck_voted_poll_ids")
   end
 
   test "existing results and vote pages retain their section breadcrumbs" do

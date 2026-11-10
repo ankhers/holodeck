@@ -6,6 +6,7 @@ defmodule HolodeckWeb.Poll.ResultPage do
 
   js_import :Chart, from: "chart.js/auto"
   js_import :copyVoteLink, from: "./clipboard.mjs"
+  js_import :absoluteVoteUrl, from: "./clipboard.mjs"
 
   route "/poll/:poll_id"
 
@@ -25,7 +26,7 @@ defmodule HolodeckWeb.Poll.ResultPage do
           poll: poll,
           answers: answers,
           frequencies: Enum.frequencies_by(answers, & &1.answer_number),
-          voted?: poll.id in get_session(server, :voted_poll_ids, []),
+          voted?: poll.id in get_session(server, "holodeck_voted_poll_ids", []),
           vote_url: "/poll/#{poll.id}/vote",
           breadcrumbs: [{"Polls", HolodeckWeb.Poll.PollPage}, {"Results", nil}]
         )
@@ -90,8 +91,7 @@ defmodule HolodeckWeb.Poll.ResultPage do
         }
       ])
 
-    location = JS.get(:window, :location)
-    vote_url = JS.get(location, :origin) <> "/poll/#{component.state.poll.id}/vote"
+    vote_url = JS.call(:absoluteVoteUrl, [component.state.vote_url])
 
     put_state(component, chart: chart, buffer: buffer, vote_url: vote_url)
   end
