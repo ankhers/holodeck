@@ -18,6 +18,7 @@
 
     <div class="max-w-[560px] mx-auto">
 
+      {%if @poll}
       <div class="text-base-content/35 text-[11px] uppercase tracking-[1px] mb-2.5 font-mono">Poll Results</div>
 
       <div class="bg-base-300 border border-white/20 rounded-lg px-5 py-5 flex flex-col gap-5">
@@ -60,6 +61,10 @@
         <Hologram.UI.Link to={HolodeckWeb.Poll.VotePage, poll_id: @poll.id} class="text-primary no-underline hover:underline">vote page</Hologram.UI.Link>
         to cast your vote.
       </p>
+      {%else}
+        <h1 class="text-[15px] font-semibold mb-3">Poll not found</h1>
+        <Hologram.UI.Link to={HolodeckWeb.Poll.PollPage} class="text-primary hover:underline">Create a poll</Hologram.UI.Link>
+      {/if}
 
     </div>
   </div>

@@ -14,16 +14,21 @@ defmodule HolodeckWeb.Poll.ResultPage do
 
   def init(params, component, server) do
     poll = Polls.get_poll(params.poll_id)
-    answers = Polls.get_answers_for(params.poll_id)
 
-    component =
-      component
-      |> put_state(poll: poll, answers: answers, frequencies: %{})
-      |> put_action(:init_chart)
+    if poll do
+      answers = Polls.get_answers_for(poll.id)
 
-    server = put_subscription(server, {:poll_result, poll.id})
+      component =
+        component
+        |> put_state(poll: poll, answers: answers, frequencies: %{})
+        |> put_action(:init_chart)
 
-    {component, server}
+      server = put_subscription(server, {:poll_result, poll.id})
+
+      {component, server}
+    else
+      {put_state(component, poll: nil), server}
+    end
   end
 
   def action(:init_chart, _params, component) do

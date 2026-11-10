@@ -14,7 +14,10 @@ defmodule Holodeck.Polls do
   end
 
   def get_poll(poll_id) do
-    Repo.get(Poll, poll_id)
+    case Ecto.UUID.cast(poll_id) do
+      {:ok, uuid} -> Repo.get(Poll, uuid)
+      :error -> nil
+    end
   end
 
   def get_answers_for(poll_id) do
