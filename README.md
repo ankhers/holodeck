@@ -18,7 +18,7 @@ framework rather than the scaffolding around it.
   flow through `Hologram.Realtime` subscriptions and broadcasts.
 - **Phoenix / Bandit** - HTTP endpoint.
 - **Ecto + PostgreSQL** - persistence for chat rooms, messages, and polls.
-- **Tailwind CSS + esbuild** - asset pipeline.
+- **Tailwind CSS** - stylesheet pipeline; Hologram builds its own JavaScript bundles.
 
 ## Getting started
 

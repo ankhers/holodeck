@@ -24,7 +24,6 @@ config :holodeck, HolodeckWeb.Endpoint,
   debug_errors: true,
   secret_key_base: "jpKov9vDr/awrtTZX/crYI9ka0BO+v3/ZMjPVTwTDrtcf8S7FTDjSuNDPc7tzmLb",
   watchers: [
-    esbuild: {Esbuild, :install_and_run, [:holodeck, ~w(--sourcemap=inline --watch)]},
     tailwind: {Tailwind, :install_and_run, [:holodeck, ~w(--watch)]}
   ]
 

@@ -1,12 +1,12 @@
 defmodule HolodeckWeb do
   @moduledoc """
   The entrypoint for defining your web interface, such
-  as controllers, components, channels, and so on.
+  as pages, components, channels, and so on.
 
   This can be used in your application as:
 
       use HolodeckWeb, :page
-      use HolodeckWeb, :html
+      use HolodeckWeb, :component
 
   The definitions below will be executed for every page,
   component, etc, so keep them short and clean, focused
@@ -51,38 +51,6 @@ defmodule HolodeckWeb do
   def channel do
     quote do
       use Phoenix.Channel
-    end
-  end
-
-  def html do
-    quote do
-      use Phoenix.Component
-
-      # Import convenience functions from controllers
-      import Phoenix.Controller,
-        only: [get_csrf_token: 0, view_module: 1, view_template: 1]
-
-      # Include general helpers for rendering HTML
-      unquote(html_helpers())
-    end
-  end
-
-  defp html_helpers do
-    quote do
-      # Translation
-      use Gettext, backend: HolodeckWeb.Gettext
-
-      # HTML escaping functionality
-      import Phoenix.HTML
-      # Core UI components
-      import HolodeckWeb.CoreComponents
-
-      # Common modules used in templates
-      alias Phoenix.LiveView.JS
-      alias HolodeckWeb.Layouts
-
-      # Routes generation with the ~p sigil
-      unquote(verified_routes())
     end
   end
 
