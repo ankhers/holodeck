@@ -11,26 +11,37 @@ defmodule Holodeck.BrowserHelpers do
   end
 
   def assert_page_ready(session, page) do
+    expected_page = inspect(page)
+
     result =
       retry(fn ->
         execute_script(
           session,
           """
-          return globalThis.Hologram?.mountedPage === arguments[0] &&
-            globalThis.Hologram?.['wsConnected?'] === true &&
-            globalThis.Hologram?.['sseConnected?'] === true;
+          return {
+            mountedPage: globalThis.Hologram?.mountedPage ?? null,
+            wsConnected: globalThis.Hologram?.['wsConnected?'] ?? null,
+            sseConnected: globalThis.Hologram?.['sseConnected?'] ?? null
+          };
           """,
-          [inspect(page)],
-          fn ready? -> send(self(), {:page_ready, ready?}) end
+          [],
+          fn state -> send(self(), {:page_state, state}) end
         )
 
         receive do
-          {:page_ready, true} -> {:ok, session}
-          {:page_ready, _} -> {:error, :page_not_ready}
+          {:page_state,
+           %{"mountedPage" => mounted_page, "wsConnected" => true, "sseConnected" => true}}
+          when mounted_page == expected_page ->
+            {:ok, session}
+
+          {:page_state, state} ->
+            {:error, state}
         end
       end)
 
-    assert {:ok, ^session} = result, "Hologram page or connections did not become ready"
+    assert {:ok, ^session} = result,
+           "Hologram page or connections did not become ready for #{inspect(page)}: #{inspect(result)}"
+
     session
   end
 end
