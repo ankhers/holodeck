@@ -1,20 +1,4 @@
-<div class="min-h-screen bg-base-100 text-base-content font-sans text-sm relative overflow-x-hidden">
-
-  <div class="hd-grain fixed inset-0 pointer-events-none z-0 opacity-[0.025]"></div>
-  <div class="hd-glow fixed top-[-30%] left-1/2 -translate-x-1/2 w-[70vw] h-[50vh] pointer-events-none z-0"></div>
-
-  <div class="relative z-[1] max-w-[1180px] mx-auto px-6 pb-12">
-
-    <nav class="flex items-center py-[18px] mb-6 border-b border-white/[0.08]">
-      <div class="flex items-center gap-2.5 text-[15px] font-semibold tracking-[-0.01em]">
-        <Hologram.UI.Link to={HolodeckWeb.HomePage} class="flex items-center gap-2.5 no-underline text-base-content">
-          <div class="hd-logo-icon w-7 h-7 rounded-[7px] flex items-center justify-center text-sm font-bold text-white shrink-0">H</div>
-          Holodeck
-        </Hologram.UI.Link>
-        <span class="text-base-content/50 mx-px">/</span>
-        <span class="text-base-content/75 font-normal">Polls</span>
-      </div>
-    </nav>
+<HolodeckWeb.Components.AppShell breadcrumbs={[{"Polls", nil}]}>
 
     <div class="max-w-[480px] mx-auto">
 
@@ -56,5 +40,4 @@
       </form>
 
     </div>
-  </div>
-</div>
+</HolodeckWeb.Components.AppShell>

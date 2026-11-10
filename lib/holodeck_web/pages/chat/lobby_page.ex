@@ -8,7 +8,7 @@ defmodule HolodeckWeb.Chat.LobbyPage do
 
   route "/chat"
 
-  layout HolodeckWeb.Chat.Layout
+  layout HolodeckWeb.Layout, title: "Chat · Holodeck"
 
   def init(_params, component, server) do
     rooms = Chat.list_rooms()

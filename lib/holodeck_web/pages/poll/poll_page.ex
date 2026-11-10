@@ -5,7 +5,7 @@ defmodule HolodeckWeb.Poll.PollPage do
 
   route "/poll"
 
-  layout HolodeckWeb.Chat.Layout
+  layout HolodeckWeb.Layout, title: "Polls · Holodeck"
 
   def action(:create_poll, params, component) do
     put_command(component, :create_poll, params)

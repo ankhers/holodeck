@@ -5,7 +5,7 @@ defmodule HolodeckWeb.Dashboard.DashboardPage do
 
   route "/dashboard"
 
-  layout HolodeckWeb.Chat.Layout
+  layout HolodeckWeb.Layout, title: "Dashboard · Holodeck"
 
   @tick_delay 5_000
   @log_limit 100

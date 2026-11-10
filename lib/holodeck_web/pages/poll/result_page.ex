@@ -10,7 +10,7 @@ defmodule HolodeckWeb.Poll.ResultPage do
 
   param :poll_id, :string
 
-  layout HolodeckWeb.Chat.Layout
+  layout HolodeckWeb.Layout, title: "Poll results · Holodeck"
 
   def init(params, component, server) do
     poll = Polls.get_poll(params.poll_id)

@@ -7,7 +7,7 @@ defmodule HolodeckWeb.Chat.RoomPage do
   route "/chat/:room_name"
   param :room_name, :string
 
-  layout HolodeckWeb.Chat.Layout
+  layout HolodeckWeb.Layout, title: "Chat room · Holodeck"
 
   def init(params, component, server) do
     username = get_session(server, "holodeck_chat_username", "")
@@ -15,7 +15,13 @@ defmodule HolodeckWeb.Chat.RoomPage do
     messages = if room, do: Chat.get_messages_for_room(room), else: []
 
     component =
-      put_state(component, messages: messages, room: room, username: username, draft: "")
+      put_state(component,
+        messages: messages,
+        room: room,
+        username: username,
+        draft: "",
+        title: if(room, do: "# #{room.name} · Holodeck", else: "Room not found · Holodeck")
+      )
 
     server = if room, do: put_subscription(server, {:chat_room, room.name}), else: server
 

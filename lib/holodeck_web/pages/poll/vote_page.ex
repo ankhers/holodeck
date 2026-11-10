@@ -8,7 +8,7 @@ defmodule HolodeckWeb.Poll.VotePage do
 
   param :poll_id, :string
 
-  layout HolodeckWeb.Chat.Layout
+  layout HolodeckWeb.Layout, title: "Vote · Holodeck"
 
   def init(params, component, _server) do
     poll = Polls.get_poll(params.poll_id)

@@ -1,22 +1,4 @@
-<div class="h-dvh bg-base-100 text-base-content flex flex-col relative overflow-hidden">
-
-  <div class="hd-grain fixed inset-0 pointer-events-none z-0 opacity-[0.025]"></div>
-  <div class="hd-glow fixed top-[-30%] left-1/2 -translate-x-1/2 w-[70vw] h-[50vh] pointer-events-none z-0"></div>
-
-  <nav class="relative z-[1] flex items-center px-6 py-[18px] border-b border-white/[0.08] shrink-0">
-    <div class="flex items-center gap-2.5 text-[15px] font-semibold tracking-[-0.01em]">
-      <Hologram.UI.Link to={HolodeckWeb.HomePage} class="flex items-center gap-2.5 no-underline text-base-content">
-        <div class="hd-logo-icon w-7 h-7 rounded-[7px] flex items-center justify-center text-sm font-bold text-white shrink-0">H</div>
-        Holodeck
-      </Hologram.UI.Link>
-      <span class="text-base-content/50 mx-px">/</span>
-      <Hologram.UI.Link to={HolodeckWeb.Chat.LobbyPage} class="text-base-content/75 font-normal no-underline">Chat</Hologram.UI.Link>
-      {%if @room}
-        <span class="text-base-content/50 mx-px">/</span>
-        <span class="text-secondary font-normal"># {@room.name}</span>
-      {/if}
-    </div>
-  </nav>
+<HolodeckWeb.Components.AppShell breadcrumbs={[{"Chat", HolodeckWeb.Chat.LobbyPage}, {if(@room, do: "# " <> @room.name, else: "Room not found"), nil}]} full_height={true}>
 
   {%if @room == nil}
     <div id="room-not-found" class="relative z-[1] p-6">
@@ -46,4 +28,4 @@
     {/if}
   {/if}
 
-</div>
+</HolodeckWeb.Components.AppShell>

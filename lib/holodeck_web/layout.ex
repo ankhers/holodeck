@@ -1,5 +1,7 @@
-defmodule HolodeckWeb.Chat.Layout do
+defmodule HolodeckWeb.Layout do
   use HolodeckWeb, :layout
+
+  prop :title, :string, default: "Holodeck"
 
   def template do
     ~HOLO"""
@@ -8,7 +10,7 @@ defmodule HolodeckWeb.Chat.Layout do
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Holodeck</title>
+        <title>{@title}</title>
         <Hologram.UI.Runtime />
         <link rel="stylesheet" href="/assets/css/app.css" />
       </head>
