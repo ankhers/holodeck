@@ -1,0 +1,65 @@
+<HolodeckWeb.Components.AppShell breadcrumbs={[{"Game of Life", nil}]}>
+  <header class="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <p class="text-primary text-[11px] font-mono uppercase tracking-[0.15em] mb-2">Client-side playground</p>
+      <h1 class="text-3xl font-semibold tracking-tight mb-2">Game of Life</h1>
+      <p class="text-base-content/50 text-sm">Simple rules. Emergent worlds. Entirely Elixir.</p>
+    </div>
+    <span class="border border-primary/25 bg-primary/5 rounded-full px-3 py-1.5 text-primary text-[11px] font-mono">Elixir running in your browser</span>
+  </header>
+
+  <div class="life-layout">
+    <section class="life-panel min-w-0" aria-label="Simulation">
+      <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-white/[0.08] font-mono text-xs">
+        <span class="text-base-content/50">24 × 24 <span class="text-base-content/25">/</span> finite world</span>
+        <span id="life-status" class="text-primary">{if(@running, do: "Running", else: "Paused")}</span>
+      </div>
+      <div id="life-board-scroll" class="life-board-scroll" tabindex="0" aria-label="Scrollable Game of Life board">
+        <div id="life-board" class="life-board">
+          {%for id <- 0..575}
+            <button type="button" id={"life-cell-#{id}"} class={if(elem(@cells, id) == 1, do: "life-cell life-cell-live", else: "life-cell")} aria-pressed={if(elem(@cells, id) == 1, do: "true", else: "false")} aria-label={"Cell #{rem(id, 24) + 1}, #{div(id, 24) + 1}"} $click={:toggle, id: id}></button>
+          {/for}
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-6 px-5 py-4 border-t border-white/[0.08] font-mono text-xs text-base-content/50">
+        <span>Generation <strong id="life-generation" class="text-base-content ml-2">{@generation}</strong></span>
+        <span>Population <strong id="life-population" class="text-primary ml-2">{@population}</strong></span>
+      </div>
+    </section>
+
+    <aside class="flex flex-col gap-3 min-w-0">
+      <section class="life-panel p-5">
+        <h2 class="life-label mb-4">Take control</h2>
+        <div class="flex flex-wrap items-center gap-2 mb-5">
+          <button id="life-play" type="button" class="bg-primary text-primary-content rounded-md px-3.5 py-2 text-[13px] font-semibold font-mono cursor-pointer transition hover:brightness-110 active:translate-y-px disabled:opacity-50 disabled:cursor-not-allowed" $click={if(@running, do: :pause, else: :play)}>{if(@running, do: "Pause", else: "Play")}</button>
+          <button id="life-step" type="button" disabled={@running} class="bg-primary text-primary-content rounded-md px-3.5 py-2 text-[13px] font-semibold font-mono cursor-pointer transition hover:brightness-110 active:translate-y-px disabled:opacity-50 disabled:cursor-not-allowed" $click="step">Step</button>
+        </div>
+        <label for="life-speed" class="life-label block mb-2">Tick interval</label>
+        <select id="life-speed" class="life-speed w-full mb-5" value={@delay_ms} $change="speed">
+          {%for delay <- [100, 200, 500, 1000]}
+            <option value={delay}>{delay} ms</option>
+          {/for}
+        </select>
+        <div class="flex flex-wrap gap-2">
+          <button id="life-clear" type="button" class="border border-white/15 text-base-content/75 rounded-md px-3 py-1.5 text-[12px] font-mono cursor-pointer transition-colors hover:border-primary/50 hover:text-base-content" $click="clear">Clear</button>
+          <button id="life-randomise" type="button" class="border border-white/15 text-base-content/75 rounded-md px-3 py-1.5 text-[12px] font-mono cursor-pointer transition-colors hover:border-primary/50 hover:text-base-content" $click="randomise">Randomise</button>
+        </div>
+        <h2 class="life-label mt-6 mb-3">Seed a pattern</h2>
+        <div class="flex flex-wrap gap-2">
+          {%for {name, label} <- [{:glider, "Glider"}, {:blinker, "Blinker"}, {:pulsar, "Pulsar"}]}
+            <button id={"life-preset-#{name}"} type="button" class="border border-white/15 text-base-content/75 rounded-md px-3 py-1.5 text-[12px] font-mono cursor-pointer transition-colors hover:border-primary/50 hover:text-base-content" $click={:preset, name: name}>{label}</button>
+          {/for}
+        </div>
+        <p class="mt-4 text-xs leading-relaxed text-base-content/50">Click any cell to shape the world, even while it’s playing. Seeds reset the generation and pause the simulation.</p>
+      </section>
+      <section class="life-panel p-5">
+        <h2 class="life-label mb-3">The rules</h2>
+        <p class="text-sm leading-relaxed text-base-content/75">A live cell survives with 2 or 3 neighbours. A dead cell is born with exactly 3. Beyond the edges, all is quiet.</p>
+        <div class="mt-5 pt-4 border-t border-white/[0.08]">
+          <p class="text-primary text-xs font-mono mb-2">Simulation server commands: 0</p>
+          <p class="text-xs leading-relaxed text-base-content/50">After loading, every control and generation runs locally.</p>
+        </div>
+      </section>
+    </aside>
+  </div>
+</HolodeckWeb.Components.AppShell>
