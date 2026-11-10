@@ -11,6 +11,17 @@ defmodule Holodeck.LifeTest do
     assert Life.next(Life.empty()) == Life.empty()
   end
 
+  test "birth and survival depend on the eight neighbours" do
+    neighbours = for y <- 10..12, x <- 10..12, {x, y} != {11, 11}, do: {x, y}
+
+    for count <- 0..8, alive <- [0, 1] do
+      points = Enum.take(neighbours, count)
+      points = if alive == 1, do: [{11, 11} | points], else: points
+      expected = if count == 3 or (alive == 1 and count == 2), do: 1, else: 0
+      assert elem(Life.next(board(points)), 11 * 24 + 11) == expected
+    end
+  end
+
   test "block is a still life" do
     cells = board([{10, 10}, {11, 10}, {10, 11}, {11, 11}])
     assert Life.next(cells) == cells

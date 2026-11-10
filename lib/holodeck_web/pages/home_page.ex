@@ -17,12 +17,14 @@ defmodule HolodeckWeb.HomePage do
         <p class="text-sm text-base-content/50 max-w-[400px] mx-auto leading-relaxed">A showcase app demonstrating the Hologram framework running in different contexts.</p>
       </div>
 
-      <div class="grid grid-cols-3 gap-3 max-w-[960px] mx-auto">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-w-[960px] mx-auto">
         <Card icon="hero-chat-bubble-left" title="Chat" body="Real-time messaging with rooms." link_page={HolodeckWeb.Chat.LobbyPage} />
 
         <Card icon="hero-squares-2x2" title="Dashboard" body="Live system metrics, process info, and log streaming." link_page={HolodeckWeb.Dashboard.DashboardPage} />
 
         <Card icon="hero-chart-bar" title="Polls" body="Live voting with real-time results, using Chart.js for visualizations." link_page={HolodeckWeb.Poll.PollPage} />
+
+        <Card icon="hero-sparkles" title="Game of Life" body="Explore Conway's cellular automaton." caption="Client-side Elixir · delayed actions · zero simulation commands" link_page={HolodeckWeb.Life.LifePage} />
       </div>
 
       <!-- The footer follows the content's 12-unit bottom gap; its negative margin cancels the shell's bottom padding. -->

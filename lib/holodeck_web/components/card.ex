@@ -7,6 +7,7 @@ defmodule HolodeckWeb.Components.Card do
   prop :title, :string
   prop :body, :string
   prop :link_page, :atom
+  prop :caption, :string, default: nil
 
   def template do
     ~HOLO"""
@@ -16,6 +17,9 @@ defmodule HolodeckWeb.Components.Card do
         </div>
         <div class="text-[15px] font-semibold text-base-content mb-1.5">{@title}</div>
         <div class="text-xs text-base-content/45 leading-relaxed">{@body}</div>
+        {%if @caption}
+          <div class="mt-3 text-[11px] text-base-content/50 font-mono leading-relaxed">{@caption}</div>
+        {/if}
         <div class="mt-4 text-[11px] font-semibold uppercase tracking-[0.08em] text-primary">Open →</div>
       </Link>
     """
