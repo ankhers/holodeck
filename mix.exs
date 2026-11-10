@@ -5,12 +5,12 @@ defmodule Holodeck.MixProject do
     [
       app: :holodeck,
       version: "0.1.0",
-      elixir: "~> 1.15",
+      elixir: "~> 1.19",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
-      compilers: [:phoenix_live_view, :hologram] ++ Mix.compilers(),
+      compilers: [:phoenix_live_view] ++ Mix.compilers() ++ [:hologram],
       listeners: [Phoenix.CodeReloader]
     ]
   end
@@ -52,7 +52,7 @@ defmodule Holodeck.MixProject do
        app: false,
        compile: false,
        depth: 1},
-      {:hologram, "~> 0.9.1"},
+      {:hologram, "~> 0.12.7"},
       {:jason, "~> 1.2"},
       {:lazy_html, ">= 0.1.0", only: :test},
       {:phoenix, "~> 1.8.7"},

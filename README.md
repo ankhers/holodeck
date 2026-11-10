@@ -22,6 +22,9 @@ framework rather than the scaffolding around it.
 
 ## Getting started
 
+Hologram 0.12 requires Elixir 1.19+, OTP 28.1+, and Node.js 20+ (with npm).
+The devenv shell provides the supported toolchain.
+
 ```sh
 mix setup          # install deps, create + migrate DB, build assets
 mix holo           # or: iex -S mix holo
