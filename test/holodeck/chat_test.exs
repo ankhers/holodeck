@@ -20,7 +20,47 @@ defmodule Holodeck.ChatTest do
 
     test "rejects a name shorter than three characters" do
       assert {:error, changeset} = Chat.create_room("ab", "Alice")
-      assert errors_on(changeset).name == ["should be at least 3 character(s)"]
+      assert errors_on(changeset).name == ["Room names must be 3–40 characters"]
+    end
+
+    test "rejects names longer than forty codepoints" do
+      for name <- [
+            String.duplicate("a", 41),
+            String.duplicate("a", 256),
+            String.duplicate("é", 41),
+            String.duplicate("👩‍💻", 14)
+          ] do
+        assert {:error, changeset} = Chat.create_room(name, "Alice")
+        assert "Room names must be 3–40 characters" in errors_on(changeset).name
+      end
+    end
+
+    test "rejects URL delimiters, spaces, and emoji" do
+      for name <- ["bad/name", "bad name", "bad?name", "bad#name", "bad%name", "bad😀name"] do
+        assert {:error, changeset} = Chat.create_room(name, "Alice")
+
+        assert errors_on(changeset).name == [
+                 "Room names can only contain letters, numbers, dashes and underscores"
+               ]
+      end
+    end
+
+    test "trims a valid name before persisting it" do
+      assert {:ok, room} = Chat.create_room(" \t general-123_ \n", "Alice")
+      assert room.name == "general-123_"
+      assert Chat.get_room_by_name(room.name).id == room.id
+    end
+
+    test "accepts Unicode letters and numbers" do
+      assert {:ok, room} = Chat.create_room("café-東京１２", "Alice")
+      assert room.name == "café-東京１２"
+    end
+
+    test "accepts the three and forty codepoint boundaries" do
+      for name <- ["abc", String.duplicate("é", 40)] do
+        assert {:ok, room} = Chat.create_room(name, "Alice")
+        assert room.name == name
+      end
     end
 
     test "requires a creator" do
@@ -88,7 +128,7 @@ defmodule Holodeck.ChatTest do
 
   test "creating a duplicate room returns a friendly changeset error" do
     assert {:ok, room} = Chat.create_room("general", "Alice")
-    assert {:error, changeset} = Chat.create_room(room.name, "Bob")
+    assert {:error, changeset} = Chat.create_room(" #{room.name} ", "Bob")
     assert errors_on(changeset).name == ["A room with this name already exists"]
     assert Chat.get_room_by_name(room.name).id == room.id
   end
