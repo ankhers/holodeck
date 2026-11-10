@@ -7,7 +7,7 @@ let
   postgres = pkgs.postgresql_18;
 in
 {
-  packages = [ pkgs.biome pkgs.flyctl ];
+  packages = [ pkgs.biome pkgs.flyctl pkgs.beads ];
 
   languages = {
     nix.enable = true;
