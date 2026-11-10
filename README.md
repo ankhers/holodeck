@@ -103,3 +103,28 @@ config/                  Environment configuration
 ```sh
 mix precommit   # compile (warnings as errors), unlock unused deps, format, test
 ```
+
+### Browser tests
+
+`mix test` and `mix precommit` exclude tests tagged `:e2e`. Run the two-session
+chat and poll features explicitly in headless Chrome from the devenv shell:
+
+```sh
+E2E=1 MIX_TEST_PARTITION=_e2e mix test test/e2e
+```
+
+Use `direnv exec .` before the command if outside the shell. PostgreSQL must be
+running; set `PGHOST` to its socket directory if it is not already in your
+environment. The partition isolates the browser suite's database. The endpoint
+uses port 4002 from `config/test.exs`, ignoring `PORT`; make sure it is free.
+No separate application server is needed.
+
+`E2E=1` includes the browser tests, enables the test endpoint, and calls the public
+`Hologram.Test.setup()` to compile browser assets and start Hologram. Wallaby and
+the matching Chromium / chromedriver pair from `devenv.nix` (Linux) are only
+started for this opt-in run. On other platforms, install a matching Chromium
+(`chromium` on PATH) and chromedriver pair yourself. Tests
+use shared SQL sandbox ownership, run serially, and roll back their fixtures.
+Repo-local browser helpers wait for Hologram's mounted page and WebSocket/SSE
+connections using Wallaby retries, then assertions use Wallaby's built-in waiting.
+The unit-test PubSub helper reuses Hologram's PubSub when it is already running.

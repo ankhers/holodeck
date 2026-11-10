@@ -54,6 +54,7 @@ defmodule Holodeck.MixProject do
       {:hologram, "~> 0.12.7"},
       {:jason, "~> 1.2"},
       {:lazy_html, ">= 0.1.0", only: :test},
+      {:wallaby, "~> 0.30", only: :test, runtime: false},
       {:phoenix, "~> 1.8.7"},
       {:phoenix_ecto, "~> 4.5"},
       {:phoenix_html, "~> 4.1"},

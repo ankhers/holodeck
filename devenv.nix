@@ -7,7 +7,8 @@ let
   postgres = pkgs.postgresql_18;
 in
 {
-  packages = [ pkgs.biome pkgs.flyctl pkgs.beads ];
+  packages = [ pkgs.biome pkgs.flyctl pkgs.beads ]
+    ++ lib.optionals pkgs.stdenv.isLinux [ pkgs.chromedriver pkgs.chromium ];
 
   languages = {
     nix.enable = true;

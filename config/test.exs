@@ -12,12 +12,11 @@ config :holodeck, Holodeck.Repo,
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
 
-# We don't run a server during test. If one is required,
-# you can enable the server option below.
+# Only the opt-in browser suite needs an HTTP server.
 config :holodeck, HolodeckWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
   secret_key_base: "+1u7hGM84/Ivjxz0sApVA9DqRVCRuYKFD4N2Fs4b77XrH49iFxKxIWbcdPhSb4zT",
-  server: false
+  server: System.get_env("E2E") == "1"
 
 # In test we don't send emails
 config :holodeck, Holodeck.Mailer, adapter: Swoosh.Adapters.Test
