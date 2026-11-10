@@ -10,21 +10,6 @@ defmodule HolodeckWeb.Router do
     plug :put_secure_browser_headers
   end
 
-  pipeline :api do
-    plug :accepts, ["json"]
-  end
-
-  scope "/", HolodeckWeb do
-    pipe_through :browser
-
-    get "/", PageController, :home
-  end
-
-  # Other scopes may use custom stacks.
-  # scope "/api", HolodeckWeb do
-  #   pipe_through :api
-  # end
-
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:holodeck, :dev_routes) do
     # If you want to use the LiveDashboard in production, you should put
