@@ -142,7 +142,13 @@
 .hd-sort-btn-active { appearance: none; font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 4px; cursor: pointer; border: 1px solid rgba(167,139,250,0.3); color: #a78bfa; background: rgba(167,139,250,0.12); box-shadow: none; }
 .hd-live-dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; animation: hd-pulse 2s infinite; }
 @keyframes hd-pulse { 0%,100%{opacity:1} 50%{opacity:0.25} }
-.hd-log-row:hover { background: rgba(255,255,255,0.03); padding: 7px 8px; margin: 0 -4px; }
+.hd-log-row { display: grid; grid-template-columns: 58px 68px minmax(0, 1fr); gap: 6px 10px; align-items: start; padding: 9px 4px; }
+.hd-log-row > :last-child { grid-column: 1 / -1; }
+.hd-log-row:hover { background: rgba(255,255,255,0.03); }
+@media (min-width: 768px) {
+  .hd-log-row { grid-template-columns: 62px 72px 180px minmax(0, 1fr); }
+  .hd-log-row > :last-child { grid-column: auto; }
+}
 .hd-proc-row:hover td { background: rgba(255,255,255,0.03); }
 .hd-grain { background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E"); background-size: 256px 256px; }
 .hd-glow { background: radial-gradient(ellipse, rgba(167,139,250,0.1) 0%, transparent 70%); }

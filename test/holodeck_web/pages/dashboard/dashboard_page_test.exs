@@ -32,6 +32,11 @@ defmodule HolodeckWeb.Dashboard.DashboardPageTest do
     end
   end
 
+  test "log timestamps are formatted as UTC" do
+    timestamp = DateTime.to_unix(~U[2026-04-01 23:04:05Z], :microsecond)
+    assert DashboardPage.format_time(timestamp) == "23:04:05"
+  end
+
   test "log stream retains only the newest 100 entries in newest-first order" do
     component =
       Enum.reduce(1..150, %Component{state: %{log_msgs: []}}, fn number, component ->

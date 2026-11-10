@@ -1,6 +1,6 @@
 <HolodeckWeb.Components.AppShell breadcrumbs={[{"Dashboard", nil}]}>
 
-  <div class="grid grid-cols-[355px_1fr] gap-3 mb-3">
+  <div id="dashboard-panels" class="grid grid-cols-1 lg:grid-cols-[355px_minmax(0,1fr)] gap-3 mb-3">
 
     <!-- System Metrics -->
     <div class="bg-base-200 border border-white/[0.08] rounded-[10px] p-5">
@@ -11,14 +11,19 @@
 
       <!-- CPU -->
       <div class="mb-[18px]">
-        <div class="text-[10px] font-semibold uppercase tracking-[0.07em] text-base-content/50 mb-2.5">CPU</div>
-        {%for {core, percent_used, _, _} <- @system_metrics.cpu}
-          <div class="flex items-center gap-2.5 mb-[7px]">
-            <span class="text-[11px] text-base-content/75 w-[60px] shrink-0 font-mono">Core {core}</span>
-            <div class="flex-1 h-[5px] rounded-full bg-white/[0.06] overflow-hidden"><div style={"height: 100%; border-radius: 99px; width: #{format_percent(percent_used)}%; background: #{bar_colour(percent_used)};"}></div></div>
-            <span class="text-[11px] text-base-content/50 w-[52px] text-right font-mono">{format_percent(percent_used)}%</span>
-          </div>
-        {/for}
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-[10px] font-semibold uppercase tracking-[0.07em] text-base-content/50">CPU · overall</span>
+          <span class="text-[11px] text-base-content/75 font-mono">{format_percent(@system_metrics.cpu_average)}%</span>
+        </div>
+        <div class="h-[5px] rounded-full bg-white/[0.06] overflow-hidden mb-3"><div style={"height: 100%; border-radius: 99px; width: #{format_percent(@system_metrics.cpu_average)}%; background: #{bar_colour(@system_metrics.cpu_average)};"}></div></div>
+        <div id="cpu-cores" aria-label="Per-core CPU usage" class="grid grid-cols-8 gap-2 max-h-[132px] overflow-y-auto pr-1">
+          {%for {core, percent_used, _, _} <- @system_metrics.cpu}
+            <div title={"Core #{core}: #{format_percent(percent_used)}%"}>
+              <div class="text-[9px] text-base-content/50 font-mono mb-1">C{core}</div>
+              <div class="h-1 rounded-full bg-white/[0.06] overflow-hidden"><div style={"height: 100%; width: #{format_percent(percent_used)}%; background: #{bar_colour(percent_used)};"}></div></div>
+            </div>
+          {/for}
+        </div>
       </div>
 
       <!-- Memory -->
@@ -56,7 +61,7 @@
           <div class="text-sm font-semibold text-base-content font-mono">{format_uptime(@system_metrics.uptime)}</div>
         </div>
         <div class="bg-white/[0.03] border border-white/[0.08] rounded-[7px] px-[11px] py-[9px]">
-          <div class="text-[10px] text-base-content/50 uppercase tracking-[0.05em] mb-0.5">BEAM / OTP</div>
+          <div class="text-[10px] text-base-content/50 uppercase tracking-[0.05em] mb-0.5">Elixir / OTP</div>
           <div class="text-sm font-semibold text-base-content font-mono">{@system_metrics.elixir} / {@system_metrics.otp}</div>
         </div>
         <div class="bg-white/[0.03] border border-white/[0.08] rounded-[7px] px-[11px] py-[9px]">
@@ -71,8 +76,8 @@
     </div>
 
     <!-- Process List -->
-    <div class="bg-base-200 border border-white/[0.08] rounded-[10px] p-5">
-      <div class="flex items-center justify-between mb-[18px]">
+    <div id="process-panel" class="min-w-0 bg-base-200 border border-white/[0.08] rounded-[10px] p-5">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-[18px]">
         <div class="flex items-center gap-2.5">
           <span class="text-[11px] font-semibold uppercase tracking-[0.08em] text-base-content/50">Processes</span>
           <span class="text-[11px] text-base-content/50">{format_integer(@system_metrics.process_count)} total</span>
@@ -88,7 +93,8 @@
         </div>
       </div>
 
-      <table class="w-full border-collapse">
+      <div id="process-table-scroll" class="max-h-[520px] overflow-auto">
+      <table id="process-table" class="w-full min-w-[560px] border-collapse">
         <thead>
           <tr>
             <th class="text-[10px] font-semibold uppercase tracking-[0.07em] text-base-content/50 text-left px-2.5 pb-2.5 border-b border-white/[0.08]">PID</th>
@@ -102,7 +108,13 @@
           {%for {p, p_info} <- @system_metrics.processes}
             <tr class="hd-proc-row">
               <td class="px-2.5 py-[9px] border-b border-white/[0.04] font-mono text-[11px] text-primary">{inspect(p)}</td>
-              <td class="px-2.5 py-[9px] border-b border-white/[0.04] text-[13px] text-base-content/75">{p_info[:registered_name]}</td>
+              <td class="px-2.5 py-[9px] border-b border-white/[0.04] text-[13px] text-base-content/75 max-w-[240px] break-words">
+                {%if p_info[:registered_name] != []}
+                  {p_info[:registered_name]}
+                {%else}
+                  <span class="text-[11px] text-base-content/50 font-mono">{p_info[:initial_call]}</span>
+                {/if}
+              </td>
               <td class="px-2.5 py-[9px] border-b border-white/[0.04]">
                 <span class="font-mono text-xs text-base-content/75">{format_bytes(p_info[:memory])}</span>
               </td>
@@ -112,6 +124,7 @@
           {/for}
         </tbody>
       </table>
+      </div>
       <div class="text-center pt-3 text-[11px] text-base-content/50">Showing top {length(@system_metrics.processes)} of {format_integer(@system_metrics.process_count)} processes</div>
     </div>
   </div>
@@ -123,16 +136,21 @@
       <span class="flex items-center gap-[5px] text-[11px] text-success font-medium"><div class="hd-live-dot"></div> live</span>
     </div>
 
-    <div class="flex flex-col font-mono text-xs">
+    {%if @log_msgs == []}
+      <div id="log-empty" class="py-6 text-center text-xs text-base-content/50 font-mono">Waiting for log events…</div>
+    {%else}
+    <div id="log-stream" class="font-mono text-xs">
+      <div class="hd-log-row text-[10px] uppercase tracking-wider text-base-content/50" aria-hidden="true"><span>Level</span><span>Time · UTC</span><span>Module</span><span>Message</span></div>
       {%for log <- @log_msgs}
-        <div class="hd-log-row grid grid-cols-[auto_auto_auto_1fr] gap-2.5 items-baseline px-1 py-[7px] border-b border-white/[0.04] rounded">
-          <span class="text-[10px] font-bold px-1 py-px rounded-[3px] text-center self-center" style={"background: #{log_level_background_colour(log)}; color: #{log_level_text_colour(log)};"}>{log_level(log)}</span>
-          <span class="text-base-content/50">{format_time(log.time)}</span>
-          <span class="text-primary">[{log.module}]</span>
-          <span class="text-base-content/75 break-words">{log.msg}</span>
+        <div class="hd-log-row border-b border-white/[0.04] rounded">
+          <span class="text-[10px] font-bold px-1 py-px rounded-[3px] text-center" style={"background: #{log_level_background_colour(log)}; color: #{log_level_text_colour(log)};"}>{log_level(log)}</span>
+          <span class="text-base-content/50" title="UTC">{format_time(log.time)}</span>
+          <span class="text-primary min-w-0 [overflow-wrap:anywhere]">[{log.module}]</span>
+          <span class="text-base-content/75 min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]">{log.msg}</span>
         </div>
       {/for}
     </div>
+    {/if}
   </div>
 
 </HolodeckWeb.Components.AppShell>
