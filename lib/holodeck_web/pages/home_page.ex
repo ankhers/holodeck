@@ -11,18 +11,18 @@ defmodule HolodeckWeb.HomePage do
     ~HOLO"""
     <HolodeckWeb.Components.AppShell>
 
-      <div class="text-center mb-12">
+      <div class="text-center mb-8 sm:mb-12">
         <div class="text-[11px] font-semibold uppercase tracking-[0.12em] text-primary mb-3.5">Hologram Framework</div>
-        <h1 class="text-4xl font-bold tracking-tight text-base-content mb-3 leading-[1.15]">Holodeck</h1>
+        <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-base-content mb-3 leading-[1.15]">Holodeck</h1>
         <p class="text-sm text-base-content/50 max-w-[400px] mx-auto leading-relaxed">A showcase app demonstrating the Hologram framework running in different contexts.</p>
       </div>
 
-      <div class="grid grid-cols-3 gap-3 max-w-[960px] mx-auto">
-        <Card icon="hero-chat-bubble-left" title="Chat" body="Real-time messaging with rooms." link_page={HolodeckWeb.Chat.LobbyPage} />
+      <div id="home-demos" class="grid grid-cols-1 md:grid-cols-3 gap-3 max-w-[960px] mx-auto">
+        <Card icon="hero-chat-bubble-left" title="Chat" body="Real-time messaging with rooms." feature="Commands, broadcasts & sessions" link_page={HolodeckWeb.Chat.LobbyPage} />
 
-        <Card icon="hero-squares-2x2" title="Dashboard" body="Live system metrics, process info, and log streaming." link_page={HolodeckWeb.Dashboard.DashboardPage} />
+        <Card icon="hero-squares-2x2" title="Dashboard" body="Live system metrics, process info, and log streaming." feature="Server ticks & log streaming" link_page={HolodeckWeb.Dashboard.DashboardPage} />
 
-        <Card icon="hero-chart-bar" title="Polls" body="Live voting with real-time results, using Chart.js for visualizations." link_page={HolodeckWeb.Poll.PollPage} />
+        <Card icon="hero-chart-bar" title="Polls" body="Live voting with real-time results, using Chart.js for visualizations." feature="JS interop with Chart.js" link_page={HolodeckWeb.Poll.PollPage} />
       </div>
 
       <!-- The footer follows the content's 12-unit bottom gap; its negative margin cancels the shell's bottom padding. -->
