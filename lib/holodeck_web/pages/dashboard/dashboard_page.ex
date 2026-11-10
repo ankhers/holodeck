@@ -137,6 +137,10 @@ defmodule HolodeckWeb.Dashboard.DashboardPage do
   def metrics_dot_class(:live), do: "hd-live-dot"
   def metrics_dot_class(:stale), do: "hd-live-dot hd-live-dot-stale"
 
+  # The log stream shares the tick connection, so the tick freshness doubles as its status.
+  def log_status_label(:live), do: "streaming"
+  def log_status_label(:stale), do: "reconnecting…"
+
   def bar_class(percent) when percent >= 80, do: "bg-error"
   def bar_class(percent) when percent >= 60, do: "bg-warning"
   def bar_class(_percent), do: "bg-info"

@@ -144,6 +144,8 @@ defmodule HolodeckWeb.Dashboard.DashboardPageTest do
     assert DashboardPage.metrics_status(15_000, 0) == :live
     assert DashboardPage.metrics_status(15_001, 0) == :stale
     assert DashboardPage.metrics_dot_class(:stale) == "hd-live-dot hd-live-dot-stale"
+    assert DashboardPage.log_status_label(:live) == "streaming"
+    assert DashboardPage.log_status_label(:stale) == "reconnecting…"
   end
 
   test "bars and log levels use theme colours" do
