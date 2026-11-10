@@ -111,12 +111,13 @@ defmodule HolodeckWeb.Chat.RoomPage do
   ]
   @colours_length length(@colours)
 
-  # Use every Unicode codepoint, with a bounded accumulator for the JS runtime.
+  # Polynomial hash over all Unicode codepoints; reduce to the palette only at the end.
   def username_colour(username) do
     index =
       username
       |> String.to_charlist()
-      |> Enum.reduce(0, fn codepoint, hash -> rem(hash * 31 + codepoint, @colours_length) end)
+      |> Enum.reduce(0, fn codepoint, hash -> rem(hash * 31 + codepoint, 1_000_000_007) end)
+      |> rem(@colours_length)
 
     Enum.at(@colours, index)
   end

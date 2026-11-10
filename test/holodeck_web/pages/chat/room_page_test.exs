@@ -18,7 +18,13 @@ defmodule HolodeckWeb.Chat.RoomPageTest do
   end
 
   test "username colours use the whole name and support empty and Unicode names" do
-    assert RoomPage.username_colour("Alice") != RoomPage.username_colour("Amy")
+    colours =
+      Enum.map(
+        ["Alice", "Bob", "Carlos", "Dana", "Élodie", "Farah", "Grace", "Hiro", "Iris", "Jun"],
+        &RoomPage.username_colour/1
+      )
+
+    assert length(Enum.uniq(colours)) >= 4
     assert RoomPage.username_colour("Alice") == RoomPage.username_colour("Alice")
     assert RoomPage.username_colour("Élodie") =~ ~r/^#[0-9a-f]{6}$/
     assert RoomPage.username_colour("") =~ ~r/^#[0-9a-f]{6}$/
@@ -149,8 +155,51 @@ defmodule HolodeckWeb.Chat.RoomPageTest do
 
     assert result.next_action.name == :send_failed
     assert result.next_action.params.text == text
-    assert result.next_action.params.message == "should be at most 255 character(s)"
+    assert result.next_action.params.message == "Messages can be at most 255 characters"
     assert result.broadcasts == []
+    assert Chat.get_messages_for_room(room) == []
+  end
+
+  test "multi-codepoint graphemes cannot bypass the database message limit" do
+    {:ok, room} = Chat.create_room("general", "Alice")
+
+    for grapheme <- ["👨‍👩‍👧", "e\u0301"] do
+      text = String.duplicate(grapheme, 255)
+      assert String.length(text) == 255
+
+      result =
+        RoomPage.command(
+          :send_message,
+          %{room_name: room.name, message: text},
+          %Server{session: %{"holodeck_chat_username" => "Alice"}}
+        )
+
+      assert result.next_action.name == :send_failed
+      assert result.next_action.params.text == text
+      assert result.next_action.params.message == "Messages can be at most 255 characters"
+      assert result.broadcasts == []
+    end
+
+    assert Chat.get_messages_for_room(room) == []
+  end
+
+  test "legacy oversized session usernames fail safely when sending" do
+    {:ok, room} = Chat.create_room("general", "Alice")
+
+    for username <- [String.duplicate("a", 300), String.duplicate("👨‍👩‍👧", 32)] do
+      result =
+        RoomPage.command(
+          :send_message,
+          %{room_name: room.name, message: "Hello"},
+          %Server{session: %{"holodeck_chat_username" => username}}
+        )
+
+      assert result.next_action.name == :send_failed
+      assert result.next_action.params.text == "Hello"
+      assert result.next_action.params.message == "Usernames can be at most 32 characters"
+      assert result.broadcasts == []
+    end
+
     assert Chat.get_messages_for_room(room) == []
   end
 

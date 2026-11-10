@@ -27,9 +27,17 @@ defmodule HolodeckWeb.Chat.LobbyPage do
   end
 
   def action(:save_username, params, component) do
+    put_command(component, :save_username, username: params.event["username"])
+  end
+
+  def action(:username_saved, params, component) do
     component
-    |> put_command(:save_username, username: params.event["username"])
-    |> put_state(username: params.event["username"])
+    |> put_state(:username, params.username)
+    |> put_action(
+      name: :show,
+      target: "toast",
+      params: %{message: "Username saved", variant: :success}
+    )
   end
 
   def command(:create_room, params, server) do
@@ -49,12 +57,29 @@ defmodule HolodeckWeb.Chat.LobbyPage do
   end
 
   def command(:save_username, params, server) do
-    server
-    |> put_session("holodeck_chat_username", params.username)
-    |> put_action(
-      name: :show,
-      target: "toast",
-      params: %{message: "Username saved", variant: :success}
-    )
+    changeset =
+      {%{}, %{username: :string}}
+      |> Ecto.Changeset.cast(%{username: params.username}, [:username])
+      |> Ecto.Changeset.update_change(:username, &String.trim/1)
+      |> Ecto.Changeset.validate_required(:username, message: "Username can't be blank")
+      |> Ecto.Changeset.validate_length(:username,
+        max: 32,
+        count: :codepoints,
+        message: "Usernames can be at most 32 characters"
+      )
+
+    if changeset.valid? do
+      username = Ecto.Changeset.get_field(changeset, :username)
+
+      server
+      |> put_session("holodeck_chat_username", username)
+      |> put_action(:username_saved, username: username)
+    else
+      put_action(server,
+        name: :show,
+        target: "toast",
+        params: %{message: ChangesetErrors.message(changeset), variant: :error}
+      )
+    end
   end
 end

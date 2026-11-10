@@ -24,13 +24,23 @@ defmodule Holodeck.Chat.Message do
   end
 
   defp validate_username(changeset) do
-    validate_required(changeset, :username)
+    changeset
+    |> validate_required(:username)
+    |> validate_length(:username,
+      max: 32,
+      count: :codepoints,
+      message: "Usernames can be at most 32 characters"
+    )
   end
 
   defp validate_message(changeset) do
     changeset
     |> validate_required(:message)
-    |> validate_length(:message, max: 255)
+    |> validate_length(:message,
+      max: 255,
+      count: :codepoints,
+      message: "Messages can be at most 255 characters"
+    )
   end
 
   defp validate_room(changeset) do

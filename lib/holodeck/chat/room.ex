@@ -27,6 +27,12 @@ defmodule Holodeck.Chat.Room do
   end
 
   def validate_creator(changeset) do
-    validate_required(changeset, :creator, message: "Username can't be blank")
+    changeset
+    |> validate_required(:creator, message: "Username can't be blank")
+    |> validate_length(:creator,
+      max: 32,
+      count: :codepoints,
+      message: "Usernames can be at most 32 characters"
+    )
   end
 end
