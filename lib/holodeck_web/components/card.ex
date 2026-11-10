@@ -17,8 +17,12 @@ defmodule HolodeckWeb.Components.Card do
         </div>
         <div class="text-[15px] font-semibold text-base-content mb-1.5">{@title}</div>
         <div class="text-xs text-base-content/45 leading-relaxed">{@body}</div>
-        <div class="mt-3 mb-5 text-[11px] font-mono text-primary/65">{@feature}</div>
-        <div class="mt-auto text-[11px] font-semibold uppercase tracking-[0.08em] text-primary">Open →</div>
+        <div class="mt-auto pt-3">
+          {%if @feature != ""}
+            <div class="mb-5 text-[11px] font-mono text-primary/90">{@feature}</div>
+          {/if}
+          <div class="text-[11px] font-semibold uppercase tracking-[0.08em] text-primary">Open →</div>
+        </div>
       </Link>
     """
   end

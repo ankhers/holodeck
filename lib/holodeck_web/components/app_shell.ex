@@ -31,7 +31,7 @@ defmodule HolodeckWeb.Components.AppShell do
               {%for {label, page} <- @breadcrumbs}
                 <span class="shrink-0 text-base-content/50 mx-px">/</span>
                 {%if page}
-                  <Hologram.UI.Link to={page} class="min-w-0 truncate text-base-content/75 font-normal no-underline">{label}</Hologram.UI.Link>
+                  <Hologram.UI.Link to={page} class="shrink-0 text-base-content/75 font-normal no-underline">{label}</Hologram.UI.Link>
                 {%else}
                   <span aria-current="page" title={label} class={if(@full_height, do: "min-w-0 truncate text-secondary font-normal", else: "min-w-0 truncate text-base-content/75 font-normal")}>{label}</span>
                 {/if}
@@ -55,17 +55,15 @@ defmodule HolodeckWeb.Components.AppShell do
     do:
       "relative z-[1] flex min-w-0 items-center gap-3 px-4 sm:px-6 py-[18px] border-b border-white/[0.08] shrink-0"
 
-  def nav_class(false, breadcrumbs, connected) do
+  def nav_class(false, breadcrumbs, _connected) do
     margin = if breadcrumbs == [], do: "mb-8 sm:mb-12", else: "mb-6"
 
     [
-      "flex min-w-0 flex-wrap items-center gap-3",
-      if(connected, do: "justify-between"),
+      "flex min-w-0 items-center gap-3",
       "py-[18px]",
       margin,
       "border-b border-white/[0.08]"
     ]
-    |> Enum.reject(&is_nil/1)
     |> Enum.join(" ")
   end
 end
