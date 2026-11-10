@@ -4,6 +4,7 @@ defmodule HolodeckWeb.Chat.LobbyPage do
   alias Holodeck.Chat
 
   alias HolodeckWeb.Chat.RoomPage
+  alias HolodeckWeb.ChangesetErrors
 
   route "/chat"
 
@@ -42,23 +43,12 @@ defmodule HolodeckWeb.Chat.LobbyPage do
         put_action(server,
           name: :show,
           target: "toast",
-          params: %{message: changeset_error_message(changeset), variant: :error}
+          params: %{message: ChangesetErrors.message(changeset), variant: :error}
         )
     end
   end
 
   def command(:save_username, params, server) do
     put_session(server, "holodeck_chat_username", params.username)
-  end
-
-  defp changeset_error_message(changeset) do
-    changeset
-    |> Ecto.Changeset.traverse_errors(fn {msg, opts} ->
-      Enum.reduce(opts, msg, fn {key, value}, acc ->
-        String.replace(acc, "%{#{key}}", to_string(value))
-      end)
-    end)
-    |> Enum.flat_map(fn {_field, errors} -> errors end)
-    |> Enum.join(", ")
   end
 end

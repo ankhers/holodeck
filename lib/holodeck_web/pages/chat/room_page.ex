@@ -2,6 +2,7 @@ defmodule HolodeckWeb.Chat.RoomPage do
   use HolodeckWeb, :page
 
   alias Holodeck.Chat
+  alias HolodeckWeb.ChangesetErrors
 
   route "/chat/:room_name"
   param :room_name, :string
@@ -9,7 +10,7 @@ defmodule HolodeckWeb.Chat.RoomPage do
   layout HolodeckWeb.Chat.Layout
 
   def init(params, component, server) do
-    username = get_session(server, "holodeck_chat_username")
+    username = get_session(server, "holodeck_chat_username", "")
     room = Chat.get_room_by_name(params.room_name)
     messages = if room, do: Chat.get_messages_for_room(room), else: []
 
@@ -26,22 +27,31 @@ defmodule HolodeckWeb.Chat.RoomPage do
   end
 
   def action(:send_message, _params, component) do
-    username = component.state.username
-    room = component.state.room
-
-    put_command(component, :send_message, %{
-      username: username,
-      room: room,
-      message: component.state.draft
-    })
-  end
-
-  def action(:message_sent, params, component) do
-    if component.state.draft == params.message do
-      put_state(component, :draft, "")
+    if String.trim(component.state.draft) == "" do
+      component
     else
       component
+      |> put_command(:send_message, %{
+        room_name: component.state.room.name,
+        message: component.state.draft
+      })
+      |> put_state(:draft, "")
     end
+  end
+
+  def action(:send_failed, params, component) do
+    component =
+      if component.state.draft == "" do
+        put_state(component, :draft, params.text)
+      else
+        component
+      end
+
+    put_action(component,
+      name: :show,
+      target: "toast",
+      params: %{message: params.message, variant: :error}
+    )
   end
 
   def action(:add_message, params, component) do
@@ -49,23 +59,30 @@ defmodule HolodeckWeb.Chat.RoomPage do
   end
 
   def command(:send_message, params, server) do
-    case Holodeck.Chat.create_message(params.username, params.room.id, params.message) do
-      {:ok, message} ->
-        server
-        |> put_broadcast({:chat_room, params.room.name}, :add_message, message: message)
-        |> put_action(:message_sent, message: params.message)
+    # Resolve identity and room on the server; command params are client-controlled.
+    username = get_session(server, "holodeck_chat_username", "")
+    room = Chat.get_room_by_name(params.room_name)
 
-      {:error, _changeset} ->
-        put_action(server,
-          name: :show,
-          target: "toast",
-          params: %{
-            message:
-              "Message could not be sent. Set a username in the lobby and enter a message.",
-            variant: :error
-          }
-        )
+    cond do
+      !is_binary(username) || String.trim(username) == "" ->
+        send_failed(server, params.message, "Set a username in the lobby to send messages.")
+
+      is_nil(room) ->
+        send_failed(server, params.message, "Room not found")
+
+      true ->
+        case Chat.create_message(username, room.id, params.message) do
+          {:ok, message} ->
+            put_broadcast(server, {:chat_room, room.name}, :add_message, message: message)
+
+          {:error, changeset} ->
+            send_failed(server, params.message, ChangesetErrors.message(changeset))
+        end
     end
+  end
+
+  defp send_failed(server, text, message) do
+    put_action(server, :send_failed, text: text, message: message)
   end
 
   @colours [
