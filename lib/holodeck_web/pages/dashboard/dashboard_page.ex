@@ -29,23 +29,13 @@ defmodule HolodeckWeb.Dashboard.DashboardPage do
     put_state(component, log_msgs: Enum.take([params | component.state.log_msgs], @log_limit))
   end
 
-  def action(:sort_memory, _params, component) do
+  def action(:sort, %{by: by}, component) when by in [:memory, :reductions, :pid] do
     component
-    |> put_command(:process_sort, %{order: :memory})
-    |> put_state(process_sort: :memory)
+    |> put_command(:process_sort, %{by: by})
+    |> put_state(process_sort: by)
   end
 
-  def action(:sort_reductions, _params, component) do
-    component
-    |> put_command(:process_sort, %{order: :reductions})
-    |> put_state(process_sort: :reductions)
-  end
-
-  def action(:sort_pid, _params, component) do
-    component
-    |> put_command(:process_sort, %{order: :pid})
-    |> put_state(process_sort: :pid)
-  end
+  def action(:sort, _params, component), do: component
 
   def action(:tick, _params, component) do
     put_command(component, :tick)
@@ -61,13 +51,15 @@ defmodule HolodeckWeb.Dashboard.DashboardPage do
     put_state(component, system_metrics: system_metrics)
   end
 
-  def command(:process_sort, params, server) do
-    system_metrics = Dashboard.system_metrics(process_sort: params.order)
+  def command(:process_sort, %{by: by}, server) when by in [:memory, :reductions, :pid] do
+    system_metrics = Dashboard.system_metrics(process_sort: by)
 
     server
-    |> put_session("holodeck_dashboard_process_sort", params.order)
+    |> put_session("holodeck_dashboard_process_sort", by)
     |> put_action(:store_metrics, system_metrics)
   end
+
+  def command(:process_sort, _params, server), do: server
 
   def command(:tick, _params, server) do
     process_sort = get_session(server, "holodeck_dashboard_process_sort", :memory)

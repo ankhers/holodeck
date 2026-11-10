@@ -1,4 +1,4 @@
-<HolodeckWeb.Components.AppShell breadcrumbs={[{"Dashboard", nil}]} connected={true}>
+<HolodeckWeb.Components.AppShell breadcrumbs={[{"Dashboard", nil}]}>
 
   <div class="grid grid-cols-[355px_1fr] gap-3 mb-3">
 
@@ -80,9 +80,9 @@
         <div class="flex items-center gap-3">
           <div class="flex items-center gap-[5px]">
             <span class="text-[10px] text-base-content/50">sort</span>
-            <button class={sort_button_class(@process_sort, :memory)} $click="sort_memory">memory</button>
-            <button class={sort_button_class(@process_sort, :reductions)} $click="sort_reductions">reductions</button>
-            <button class={sort_button_class(@process_sort, :pid)} $click="sort_pid">pid</button>
+            <button class={sort_button_class(@process_sort, :memory)} id="sort-memory" $click={:sort, by: :memory}>memory</button>
+            <button class={sort_button_class(@process_sort, :reductions)} id="sort-reductions" $click={:sort, by: :reductions}>reductions</button>
+            <button class={sort_button_class(@process_sort, :pid)} id="sort-pid" $click={:sort, by: :pid}>pid</button>
           </div>
           <span class="flex items-center gap-[5px] text-[11px] text-success font-medium"><div class="hd-live-dot"></div> live</span>
         </div>
