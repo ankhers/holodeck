@@ -28,7 +28,9 @@ defmodule Holodeck.Chat.Message do
   end
 
   defp validate_message(changeset) do
-    validate_required(changeset, :message)
+    changeset
+    |> validate_required(:message)
+    |> validate_length(:message, max: 255)
   end
 
   defp validate_room(changeset) do

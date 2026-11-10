@@ -136,6 +136,24 @@ defmodule HolodeckWeb.Chat.RoomPageTest do
     assert result.broadcasts == []
   end
 
+  test "oversized messages return a validation error instead of a database exception" do
+    {:ok, room} = Chat.create_room("general", "Alice")
+    text = String.duplicate("a", 256)
+
+    result =
+      RoomPage.command(
+        :send_message,
+        %{room_name: room.name, message: text},
+        %Server{session: %{"holodeck_chat_username" => "Alice"}}
+      )
+
+    assert result.next_action.name == :send_failed
+    assert result.next_action.params.text == text
+    assert result.next_action.params.message == "should be at most 255 character(s)"
+    assert result.broadcasts == []
+    assert Chat.get_messages_for_room(room) == []
+  end
+
   test "send_failed restores an empty draft and shows an error toast" do
     params = %{text: "Hello", message: "Room not found"}
     component = %Component{state: %{draft: ""}}
