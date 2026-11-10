@@ -23,14 +23,18 @@ defmodule Holodeck.Polls do
   end
 
   def vote(poll_id, answer_number) do
-    result =
-      %Result{poll_id: poll_id}
-      |> Result.create_changeset(%{answer_number: answer_number})
-      |> Repo.insert()
+    with {:ok, uuid} <- Ecto.UUID.cast(poll_id) do
+      result =
+        %Result{poll_id: uuid}
+        |> Result.create_changeset(%{answer_number: answer_number})
+        |> Repo.insert()
 
-    with {:ok, r} <- result do
-      Hologram.Realtime.broadcast_action({:poll_result, poll_id}, :update_results, result: r)
-      result
+      with {:ok, r} <- result do
+        Hologram.Realtime.broadcast_action({:poll_result, uuid}, :update_results, result: r)
+        result
+      end
+    else
+      :error -> {:error, :invalid_poll_id}
     end
   end
 end

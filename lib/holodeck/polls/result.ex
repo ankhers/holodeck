@@ -17,6 +17,7 @@ defmodule Holodeck.Polls.Result do
     result
     |> cast(params, [:answer_number])
     |> validate_answer_number()
+    |> assoc_constraint(:poll)
   end
 
   defp validate_answer_number(changeset) do

@@ -19,27 +19,27 @@
     <div class="max-w-[480px] mx-auto">
 
       {%if @poll}
-      <div class="text-base-content/35 text-[11px] uppercase tracking-[1px] mb-2.5 font-mono">Cast Your Vote</div>
+        <div class="text-base-content/35 text-[11px] uppercase tracking-[1px] mb-2.5 font-mono">Cast Your Vote</div>
 
-      <div class="bg-base-300 border border-white/20 rounded-lg px-5 py-5 flex flex-col gap-5">
+        <div class="bg-base-300 border border-white/20 rounded-lg px-5 py-5 flex flex-col gap-5">
 
-        <div class="text-[15px] font-semibold text-base-content tracking-[-0.01em]">{@poll.question}</div>
+          <div class="text-[15px] font-semibold text-base-content tracking-[-0.01em]">{@poll.question}</div>
 
-        <hr class="border-0 border-t border-white/[0.08]" />
+          <hr class="border-0 border-t border-white/[0.08]" />
 
-        <div class="flex flex-col gap-2.5">
-          {%for {n, label} <- [{1, @poll.answer_1}, {2, @poll.answer_2}, {3, @poll.answer_3}, {4, @poll.answer_4}]}
-            <button
-              $click={:vote, answer_number: n}
-              class="flex items-center gap-3 text-left bg-transparent border border-white/[0.12] hover:border-primary/60 hover:bg-white/[0.03] rounded-md px-4 py-3 cursor-pointer transition-colors"
-            >
-              <span class="text-base-content/35 text-[11px] font-mono shrink-0 w-[18px]">{n}</span>
-              <span class="text-base-content text-[13px] font-mono">{label}</span>
-            </button>
-          {/for}
+          <div class="flex flex-col gap-2.5">
+            {%for {n, label} <- [{1, @poll.answer_1}, {2, @poll.answer_2}, {3, @poll.answer_3}, {4, @poll.answer_4}]}
+              <button
+                $click={:vote, answer_number: n}
+                class="flex items-center gap-3 text-left bg-transparent border border-white/[0.12] hover:border-primary/60 hover:bg-white/[0.03] rounded-md px-4 py-3 cursor-pointer transition-colors"
+              >
+                <span class="text-base-content/35 text-[11px] font-mono shrink-0 w-[18px]">{n}</span>
+                <span class="text-base-content text-[13px] font-mono">{label}</span>
+              </button>
+            {/for}
+          </div>
+
         </div>
-
-      </div>
       {%else}
         <h1 class="text-[15px] font-semibold mb-3">Poll not found</h1>
         <Hologram.UI.Link to={HolodeckWeb.Poll.PollPage} class="text-primary hover:underline">Create a poll</Hologram.UI.Link>
