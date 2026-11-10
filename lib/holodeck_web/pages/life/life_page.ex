@@ -3,6 +3,11 @@ defmodule HolodeckWeb.Life.LifePage do
 
   alias Holodeck.Life
 
+  @cell_count Life.size() * Life.size()
+  @presets Life.presets()
+
+  def speeds, do: [100, 200, 500, 1000]
+
   route "/life"
   layout HolodeckWeb.Layout, title: "Game of Life · Holodeck"
 
@@ -29,9 +34,7 @@ defmodule HolodeckWeb.Life.LifePage do
 
   def action(:play, _params, component), do: component
 
-  def action(:pause, _params, component) do
-    put_state(component, running: false, loop_token: component.state.loop_token + 1)
-  end
+  def action(:pause, _params, component), do: stop_loop(component)
 
   def action(:tick, %{token: token}, component) do
     if component.state.running and token == component.state.loop_token do
@@ -48,10 +51,11 @@ defmodule HolodeckWeb.Life.LifePage do
   def action(:clear, _params, component), do: reset(component, Life.empty())
   def action(:randomise, _params, component), do: reset(component, Life.random())
 
-  def action(:preset, %{name: name}, component) when name in [:glider, :blinker, :pulsar],
+  def action(:preset, %{name: name}, component) when name in @presets,
     do: reset(component, Life.preset(name))
 
-  def action(:toggle, %{id: id}, component) when is_integer(id) and id >= 0 and id < 576 do
+  def action(:toggle, %{id: id}, component)
+      when is_integer(id) and id >= 0 and id < @cell_count do
     cells = component.state.cells
     value = 1 - elem(cells, id)
 
@@ -62,12 +66,9 @@ defmodule HolodeckWeb.Life.LifePage do
   end
 
   def action(:speed, %{event: %{value: value}}, component) do
-    case value do
-      "100" -> change_speed(component, 100)
-      "200" -> change_speed(component, 200)
-      "500" -> change_speed(component, 500)
-      "1000" -> change_speed(component, 1000)
-      _ -> component
+    case Enum.find(speeds(), &(Integer.to_string(&1) == value)) do
+      nil -> component
+      delay -> change_speed(component, delay)
     end
   end
 
@@ -78,22 +79,24 @@ defmodule HolodeckWeb.Life.LifePage do
   end
 
   defp advance(component) do
-    cells = Life.next(component.state.cells)
+    {cells, population} = Life.next(component.state.cells)
 
     put_state(component,
       cells: cells,
-      population: Life.population(cells),
+      population: population,
       generation: component.state.generation + 1
     )
   end
 
   defp reset(component, cells) do
     component
-    |> action_pause()
+    |> stop_loop()
     |> put_state(cells: cells, population: Life.population(cells), generation: 0)
   end
 
-  defp action_pause(component), do: action(:pause, %{}, component)
+  defp stop_loop(component) do
+    put_state(component, running: false, loop_token: component.state.loop_token + 1)
+  end
 
   defp schedule_tick(component, token) do
     put_action(component,

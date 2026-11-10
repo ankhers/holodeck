@@ -40,7 +40,7 @@ defmodule HolodeckWeb.Life.LifePageTest do
     assert ticked.state.generation == 1
     assert ticked.next_action.params == playing.next_action.params
     assert ticked.next_action.delay == 200
-    assert ticked.state.cells == Life.next(playing.state.cells)
+    assert {ticked.state.cells, ticked.state.population} == Life.next(playing.state.cells)
   end
 
   test "pause/play rejects the old tick" do
@@ -84,7 +84,7 @@ defmodule HolodeckWeb.Life.LifePageTest do
   test "step advances exactly once while paused and is ignored while running" do
     paused = initial()
     stepped = act(paused, :step)
-    assert stepped.state.cells == Life.next(paused.state.cells)
+    assert {stepped.state.cells, stepped.state.population} == Life.next(paused.state.cells)
     assert stepped.state.generation == 1
     assert stepped.next_action == nil
     playing = act(stepped, :play)

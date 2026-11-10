@@ -1,7 +1,9 @@
 defmodule Holodeck.Life do
   @moduledoc "Finite 24×24 Conway's Game of Life, using a flat tuple of dead/live cells."
   @size 24
-  @offsets for dy <- -1..1, dx <- -1..1, {dx, dy} != {0, 0}, do: {dx, dy}
+
+  def size, do: @size
+  def presets, do: [:glider, :blinker, :pulsar]
 
   def empty, do: List.to_tuple(List.duplicate(0, @size * @size))
 
@@ -13,20 +15,23 @@ defmodule Holodeck.Life do
 
   def population(cells), do: cells |> Tuple.to_list() |> Enum.sum()
 
+  @doc "Returns {cells, population} for the next generation in a single pass."
   def next(cells) do
-    0..(@size * @size - 1)
-    |> Enum.map(fn id ->
-      x = rem(id, @size)
-      y = div(id, @size)
+    {values, population} =
+      Enum.map_reduce(0..(@size * @size - 1), 0, fn id, population ->
+        x = rem(id, @size)
+        y = div(id, @size)
 
-      neighbours =
-        Enum.reduce(@offsets, 0, fn {dx, dy}, count ->
-          count + cell(cells, x + dx, y + dy)
-        end)
+        neighbours =
+          cell(cells, x - 1, y - 1) + cell(cells, x, y - 1) + cell(cells, x + 1, y - 1) +
+            cell(cells, x - 1, y) + cell(cells, x + 1, y) +
+            cell(cells, x - 1, y + 1) + cell(cells, x, y + 1) + cell(cells, x + 1, y + 1)
 
-      if neighbours == 3 or (elem(cells, id) == 1 and neighbours == 2), do: 1, else: 0
-    end)
-    |> List.to_tuple()
+        value = if neighbours == 3 or (elem(cells, id) == 1 and neighbours == 2), do: 1, else: 0
+        {value, population + value}
+      end)
+
+    {List.to_tuple(values), population}
   end
 
   def preset(:glider), do: place([{1, 0}, {2, 1}, {0, 2}, {1, 2}, {2, 2}], 10, 10)
