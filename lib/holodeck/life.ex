@@ -1,5 +1,9 @@
 defmodule Holodeck.Life do
-  @moduledoc "Finite 24×24 Conway's Game of Life, using a flat tuple of dead/live cells."
+  @moduledoc """
+  Conway's Game of Life on a 24×24 torus: the edges wrap, so a cell on the
+  right edge neighbours the left edge, and the top row neighbours the bottom.
+  Cells are a flat tuple of 0/1 values indexed by `y * 24 + x`.
+  """
   @size 24
 
   def size, do: @size
@@ -50,6 +54,7 @@ defmodule Holodeck.Life do
     end)
   end
 
-  defp cell(_cells, x, y) when x < 0 or x >= @size or y < 0 or y >= @size, do: 0
-  defp cell(cells, x, y), do: elem(cells, y * @size + x)
+  # Neighbour coordinates are at most one step outside the board, so adding
+  # @size before rem/2 keeps them non-negative and wraps -1 and @size around.
+  defp cell(cells, x, y), do: elem(cells, rem(y + @size, @size) * @size + rem(x + @size, @size))
 end

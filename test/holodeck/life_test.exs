@@ -45,13 +45,31 @@ defmodule Holodeck.LifeTest do
     assert Enum.reduce(1..4, cells, fn _, acc -> next(acc) end) == board(translated)
   end
 
-  test "edges are dead, not wrapped, and do not join adjacent rows" do
-    assert next(board([{23, 10}, {0, 11}, {1, 11}])) == Life.empty()
-    assert next(board([{23, 23}, {0, 0}, {1, 0}])) == Life.empty()
-    assert next(board([{0, 0}, {1, 0}, {0, 1}])) == board([{0, 0}, {1, 0}, {0, 1}, {1, 1}])
+  test "edges wrap horizontally, vertically, and at the corners" do
+    # A blinker straddling the left/right edge turns vertical around x = 0.
+    assert next(board([{23, 10}, {0, 10}, {1, 10}])) == board([{0, 9}, {0, 10}, {0, 11}])
+
+    # A blinker straddling the top/bottom edge turns horizontal around y = 0.
+    assert next(board([{10, 23}, {10, 0}, {10, 1}])) == board([{9, 0}, {10, 0}, {11, 0}])
+
+    # The four corners are mutual neighbours, so they form a still-life block.
+    corners = board([{0, 0}, {23, 0}, {0, 23}, {23, 23}])
+    assert next(corners) == corners
   end
 
-  test "presets fit the finite board with the expected populations" do
+  test "wrapping uses true coordinates, not neighbouring indexes in the flat tuple" do
+    # (23, 10) and (0, 11) sit next to each other in the tuple. On the torus
+    # they are diagonal neighbours, so this L-shape becomes a block across the edge.
+    assert next(board([{23, 10}, {0, 10}, {0, 11}])) ==
+             board([{23, 10}, {0, 10}, {23, 11}, {0, 11}])
+  end
+
+  test "a glider circles the whole board and returns to its start" do
+    cells = Life.preset(:glider)
+    assert Enum.reduce(1..(4 * 24), cells, fn _, acc -> next(acc) end) == cells
+  end
+
+  test "presets fit inside the board with the expected populations" do
     for {name, count} <- [glider: 5, blinker: 3, pulsar: 48] do
       cells = Life.preset(name)
       assert tuple_size(cells) == 576
