@@ -5,6 +5,7 @@ defmodule HolodeckWeb.Poll.ResultPage do
   alias Holodeck.Polls
 
   js_import :Chart, from: "chart.js/auto"
+  js_import :copyVoteLink, from: "./clipboard.mjs"
 
   route "/poll/:poll_id"
 
@@ -96,22 +97,16 @@ defmodule HolodeckWeb.Poll.ResultPage do
   end
 
   def action(:copy_link, _params, component) do
-    try do
-      clipboard = JS.get(:navigator, :clipboard)
+    copied? = JS.call(:copyVoteLink, [component.state.vote_url]) |> Task.await()
 
-      if JS.typeof(clipboard) == "undefined" do
-        select_link(component)
-      else
-        clipboard |> JS.call(:writeText, [component.state.vote_url]) |> Task.await()
-
-        put_action(component,
-          name: :show,
-          target: "toast",
-          params: %{message: "Link copied", variant: :success}
-        )
-      end
-    rescue
-      _error -> select_link(component)
+    if copied? do
+      put_action(component,
+        name: :show,
+        target: "toast",
+        params: %{message: "Link copied", variant: :success}
+      )
+    else
+      select_link(component)
     end
   end
 
