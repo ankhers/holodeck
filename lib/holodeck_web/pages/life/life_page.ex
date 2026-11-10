@@ -38,7 +38,12 @@ defmodule HolodeckWeb.Life.LifePage do
 
   def action(:tick, %{token: token}, component) do
     if component.state.running and token == component.state.loop_token do
-      component |> advance() |> schedule_tick(token)
+      component = advance(component)
+
+      # An empty world can never change again, so stop ticking rather than count empty generations.
+      if component.state.population == 0,
+        do: stop_loop(component),
+        else: schedule_tick(component, token)
     else
       component
     end
@@ -71,6 +76,10 @@ defmodule HolodeckWeb.Life.LifePage do
       delay -> change_speed(component, delay)
     end
   end
+
+  def status(true, _generation, _population), do: "Running"
+  def status(false, generation, 0) when generation > 0, do: "Extinct"
+  def status(false, _generation, _population), do: "Paused"
 
   defp change_speed(component, delay) do
     token = component.state.loop_token + 1

@@ -145,4 +145,25 @@ defmodule HolodeckWeb.Life.LifePageTest do
     assert removed.state.population == playing.state.population - 1
     assert removed.next_action == nil
   end
+
+  test "the loop pauses itself when the population dies out" do
+    # A lone cell dies on the next generation.
+    lonely = act(act(initial(), :clear), :toggle, %{id: 100})
+    playing = act(lonely, :play)
+    extinct = act(playing, :tick, playing.next_action.params)
+
+    assert extinct.state.population == 0
+    assert extinct.state.generation == 1
+    refute extinct.state.running
+    assert extinct.next_action == nil
+    assert extinct.state.loop_token == playing.state.loop_token + 1
+    assert LifePage.status(false, 1, 0) == "Extinct"
+  end
+
+  test "status distinguishes running, paused and extinct worlds" do
+    assert LifePage.status(true, 5, 0) == "Running"
+    assert LifePage.status(false, 0, 0) == "Paused"
+    assert LifePage.status(false, 3, 4) == "Paused"
+    assert LifePage.status(false, 3, 0) == "Extinct"
+  end
 end

@@ -27,7 +27,7 @@
             <button id={"life-preset-#{name}"} type="button" class="hd-btn" $click={:preset, name: name}>{String.capitalize(Atom.to_string(name))}</button>
           {/for}
         </div>
-        <p class="mt-4 text-xs leading-relaxed text-base-content/50">Click any cell to shape the world, even while it’s playing. Seeds reset the generation and pause the simulation.</p>
+        <p class="mt-4 text-xs leading-relaxed text-base-content/50">Click any cell to shape the world, even while it’s playing. Seeds reset the generation and pause the simulation, and so does extinction.</p>
       </section>
       <section class="hd-life-panel p-5">
         <h2 class="hd-life-label mb-3">The rules</h2>
@@ -42,7 +42,7 @@
     <section class="hd-life-panel min-w-0" aria-label="Simulation">
       <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-white/[0.08] font-mono text-xs">
         <span class="text-base-content/50">{Life.size()} × {Life.size()} <span class="text-base-content/25">/</span> wrapping world</span>
-        <span id="life-status" class="text-primary">{if(@running, do: "Running", else: "Paused")}</span>
+        <span id="life-status" class={if(status(@running, @generation, @population) == "Extinct", do: "text-warning", else: "text-primary")}>{status(@running, @generation, @population)}</span>
       </div>
       <div id="life-board-scroll" class="hd-life-board-scroll" role="region" aria-label="Scrollable Game of Life board">
         <div id="life-board" class="hd-life-board" style={"--hd-life-size: #{Life.size()}"}>
