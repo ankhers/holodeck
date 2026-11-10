@@ -6,14 +6,14 @@ defmodule Holodeck.Dashboard do
 
     {sort_value, direction} =
       case process_sort do
-        :memory -> {fn {_pid, info} -> info[:total_heap_size] end, :desc}
+        :memory -> {fn {_pid, info} -> info[:memory] end, :desc}
         :reductions -> {fn {_pid, info} -> info[:reductions] end, :desc}
         :pid -> {fn {pid, _info} -> pid end, :asc}
       end
 
     short_processes =
       processes
-      |> Enum.map(fn p -> {p, Process.info(p)} end)
+      |> Enum.map(fn p -> {p, Process.info(p, [:registered_name, :reductions, :status, :memory])} end)
       |> Enum.filter(fn {_p, info} -> info != nil end)
       |> Enum.sort_by(sort_value, direction)
       |> Enum.take(20)

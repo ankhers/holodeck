@@ -125,7 +125,7 @@
                 <td class="px-2.5 py-[9px] border-b border-white/[0.04] font-mono text-[11px] text-primary">{inspect(p)}</td>
                 <td class="px-2.5 py-[9px] border-b border-white/[0.04] text-[13px] text-base-content/75">{p_info[:registered_name]}</td>
                 <td class="px-2.5 py-[9px] border-b border-white/[0.04]">
-                  <span class="font-mono text-xs text-base-content/75">{format_bytes(p_info[:total_heap_size])}</span>
+                  <span class="font-mono text-xs text-base-content/75">{format_bytes(p_info[:memory])}</span>
                 </td>
                 <td class="px-2.5 py-[9px] border-b border-white/[0.04] font-mono text-[11px] text-base-content/50">{format_integer(p_info[:reductions])}</td>
                 <td class="px-2.5 py-[9px] border-b border-white/[0.04]"><span class="text-[10px] font-semibold px-[7px] py-0.5 rounded bg-primary/[0.12] text-primary">{p_info[:status]}</span></td>

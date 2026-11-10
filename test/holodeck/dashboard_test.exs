@@ -11,6 +11,14 @@ defmodule Holodeck.DashboardTest do
     assert pids == Enum.sort(pids)
   end
 
+  test "memory is reported in bytes and sorted descending" do
+    processes = Dashboard.system_metrics(process_sort: :memory).processes
+    memory = Enum.map(processes, fn {_pid, info} -> Keyword.fetch!(info, :memory) end)
+
+    assert Enum.all?(memory, &(is_integer(&1) and &1 > 0))
+    assert memory == Enum.sort(memory, :desc)
+  end
+
   test "reductions sort stays descending" do
     processes = Dashboard.system_metrics(process_sort: :reductions).processes
     reductions = Enum.map(processes, fn {_pid, info} -> info[:reductions] end)
