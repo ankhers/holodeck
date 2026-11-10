@@ -50,14 +50,15 @@ RUN mix assets.setup
 
 COPY priv priv
 
+# Hologram bundles JavaScript during mix compile, so install app dependencies first.
+COPY assets/package.json assets/package-lock.json assets/
+RUN npm ci --prefix assets
+
 COPY lib lib
+COPY assets assets
 
 # Compile the release
 RUN mix compile
-
-COPY assets assets
-
-RUN npm install --prefix assets
 
 # compile assets
 RUN mix assets.deploy
