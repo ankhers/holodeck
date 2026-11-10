@@ -11,14 +11,21 @@ defmodule HolodeckWeb.Dashboard.DashboardPage do
   @log_limit 100
 
   def init(_params, component, server) do
-    process_sort = get_session(server, "holodeck_dashboard_process_sort", :memory)
+    process_sort = saved_sort(server)
 
     system_metrics = Dashboard.system_metrics(process_sort: process_sort)
 
     component =
       component
-      |> put_state(system_metrics: system_metrics, process_sort: process_sort, log_msgs: [])
-      |> put_action(name: :tick, delay: @tick_delay)
+      |> put_state(
+        system_metrics: system_metrics,
+        process_sort: process_sort,
+        log_msgs: [],
+        metrics_status: :live,
+        last_tick_at: nil,
+        last_tick_request_at: nil
+      )
+      |> put_action(:start_monitoring)
 
     server = put_subscription(server, {:dashboard, "logs"})
 
@@ -37,13 +44,45 @@ defmodule HolodeckWeb.Dashboard.DashboardPage do
 
   def action(:sort, _params, component), do: component
 
+  def action(:start_monitoring, _params, component) do
+    now = System.monotonic_time(:millisecond)
+
+    component
+    |> put_state(last_tick_at: now, last_tick_request_at: now)
+    |> put_command(:tick)
+    |> put_action(name: :watchdog, delay: 1_000)
+  end
+
+  # An independent action timer can detect (and retry) a failed command round-trip.
+  def action(:watchdog, _params, component) do
+    now = System.monotonic_time(:millisecond)
+    status = metrics_status(now, component.state.last_tick_at)
+
+    component =
+      component
+      |> put_state(metrics_status: status)
+      |> put_action(name: :watchdog, delay: 1_000)
+
+    if status == :stale and now - component.state.last_tick_request_at >= @tick_delay do
+      action(:tick, %{}, component)
+    else
+      component
+    end
+  end
+
   def action(:tick, _params, component) do
-    put_command(component, :tick)
+    component
+    |> put_state(last_tick_request_at: System.monotonic_time(:millisecond))
+    |> put_command(:tick)
   end
 
   def action(:tick_update, params, component) do
     component
-    |> put_state(system_metrics: params)
+    |> put_state(
+      system_metrics: params,
+      last_tick_at: System.monotonic_time(:millisecond),
+      metrics_status: :live
+    )
     |> put_action(name: :tick, delay: @tick_delay)
   end
 
@@ -51,7 +90,9 @@ defmodule HolodeckWeb.Dashboard.DashboardPage do
     put_state(component, system_metrics: system_metrics)
   end
 
-  def command(:process_sort, %{by: by}, server) when by in [:memory, :reductions, :pid] do
+  def command(:process_sort, %{by: by}, server)
+      when by in [:memory, :reductions, :pid, "memory", "reductions", "pid"] do
+    by = normalize_sort(by)
     system_metrics = Dashboard.system_metrics(process_sort: by)
 
     server
@@ -62,12 +103,30 @@ defmodule HolodeckWeb.Dashboard.DashboardPage do
   def command(:process_sort, _params, server), do: server
 
   def command(:tick, _params, server) do
-    process_sort = get_session(server, "holodeck_dashboard_process_sort", :memory)
+    process_sort = saved_sort(server)
 
     system_metrics = Dashboard.system_metrics(process_sort: process_sort)
 
     put_action(server, :tick_update, system_metrics)
   end
+
+  def normalize_sort(value) when value in [:memory, "memory"], do: :memory
+  def normalize_sort(value) when value in [:reductions, "reductions"], do: :reductions
+  def normalize_sort(value) when value in [:pid, "pid"], do: :pid
+  def normalize_sort(_value), do: :memory
+
+  defp saved_sort(server) do
+    server |> get_session("holodeck_dashboard_process_sort", :memory) |> normalize_sort()
+  end
+
+  def metrics_status(now, last_tick_at) when now - last_tick_at > 15_000, do: :stale
+  def metrics_status(_now, _last_tick_at), do: :live
+
+  def metrics_status_class(:live), do: "text-success"
+  def metrics_status_class(:stale), do: "text-warning"
+
+  def metrics_dot_class(:live), do: "hd-live-dot"
+  def metrics_dot_class(:stale), do: "hd-live-dot hd-live-dot-stale"
 
   def bar_colour(percent) when percent >= 80, do: "#f87171"
   def bar_colour(percent) when percent >= 60, do: "#fbbf24"

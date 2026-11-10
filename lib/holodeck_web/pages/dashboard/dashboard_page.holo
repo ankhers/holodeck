@@ -6,7 +6,7 @@
     <div class="bg-base-200 border border-white/[0.08] rounded-[10px] p-5">
       <div class="flex items-center justify-between mb-[18px]">
         <span class="text-[11px] font-semibold uppercase tracking-[0.08em] text-base-content/50">System Metrics</span>
-        <span class="flex items-center gap-[5px] text-[11px] text-success font-medium"><div class="hd-live-dot"></div> live</span>
+        <span id="metrics-status" role="status" class={"flex items-center gap-[5px] text-[11px] font-medium #{metrics_status_class(@metrics_status)}"}><div class={metrics_dot_class(@metrics_status)}></div> {@metrics_status}</span>
       </div>
 
       <!-- CPU -->
@@ -89,7 +89,7 @@
             <button class={sort_button_class(@process_sort, :reductions)} id="sort-reductions" $click={:sort, by: :reductions}>reductions</button>
             <button class={sort_button_class(@process_sort, :pid)} id="sort-pid" $click={:sort, by: :pid}>pid</button>
           </div>
-          <span class="flex items-center gap-[5px] text-[11px] text-success font-medium"><div class="hd-live-dot"></div> live</span>
+          <span id="process-status" class={"flex items-center gap-[5px] text-[11px] font-medium #{metrics_status_class(@metrics_status)}"}><div class={metrics_dot_class(@metrics_status)}></div> {@metrics_status}</span>
         </div>
       </div>
 
@@ -133,7 +133,7 @@
   <div class="bg-base-200 border border-white/[0.08] rounded-[10px] p-5">
     <div class="flex items-center justify-between mb-[18px]">
       <span class="text-[11px] font-semibold uppercase tracking-[0.08em] text-base-content/50">Log Stream</span>
-      <span class="flex items-center gap-[5px] text-[11px] text-success font-medium"><div class="hd-live-dot"></div> live</span>
+      <span class="text-[11px] text-base-content/50 font-medium">streaming</span>
     </div>
 
     {%if @log_msgs == []}

@@ -15,21 +15,122 @@ defmodule HolodeckWeb.Dashboard.DashboardPageTest do
   end
 
   test "sort command persists supported columns and returns sorted metrics" do
-    for by <- [:memory, :reductions, :pid] do
-      result = DashboardPage.command(:process_sort, %{by: by}, %Server{})
+    for {saved, by} <- sort_values() do
+      result = DashboardPage.command(:process_sort, %{by: saved}, %Server{})
       assert result.session["holodeck_dashboard_process_sort"] == by
       assert result.next_action.name == :store_metrics
-      assert length(result.next_action.params.processes) == 20
+      assert_sorted(result.next_action.params, by)
+
+      tick = DashboardPage.command(:tick, %{}, result)
+      assert_sorted(tick.next_action.params, by)
     end
   end
 
   test "invalid or missing sort parameters do not change state or reach metrics" do
-    for params <- [%{by: :unsupported}, %{by: "memory"}, %{}, %{order: :memory}] do
+    for params <- [%{by: :unsupported}, %{by: "unknown"}, %{}, %{order: :memory}] do
       component = %Component{state: %{process_sort: :memory}}
       server = %Server{}
       assert DashboardPage.action(:sort, params, component) == component
       assert DashboardPage.command(:process_sort, params, server) == server
     end
+  end
+
+  test "init normalizes atom, string and unknown session sorts" do
+    for {saved, by} <- sort_values() ++ [{"unknown", :memory}, {nil, :memory}, {%{}, :memory}] do
+      server = %Server{session: %{"holodeck_dashboard_process_sort" => saved}}
+      {component, _server} = DashboardPage.init(%{}, %Component{}, server)
+      assert component.state.process_sort == by
+      assert_sorted(component.state.system_metrics, by)
+      assert component.next_action.name == :start_monitoring
+    end
+  end
+
+  test "tick normalizes atom, string and unknown session sorts" do
+    for {saved, by} <- sort_values() ++ [{"unknown", :memory}, {nil, :memory}, {%{}, :memory}] do
+      server = %Server{session: %{"holodeck_dashboard_process_sort" => saved}}
+      result = DashboardPage.command(:tick, %{}, server)
+      assert result.next_action.name == :tick_update
+      assert_sorted(result.next_action.params, by)
+    end
+  end
+
+  test "monitoring initializes its timestamps in the client action, not during SSR" do
+    before = System.monotonic_time(:millisecond)
+    result = DashboardPage.action(:start_monitoring, %{}, %Component{})
+    assert result.state.last_tick_at >= before
+    assert result.state.last_tick_at == result.state.last_tick_request_at
+    assert result.next_command.name == :tick
+    assert result.next_action.name == :watchdog
+    assert result.next_action.delay == 1_000
+  end
+
+  test "watchdog marks missed updates stale, retries, and independently reschedules itself" do
+    now = System.monotonic_time(:millisecond)
+
+    result =
+      DashboardPage.action(:watchdog, %{}, %Component{
+        state: %{last_tick_at: now - 16_000, last_tick_request_at: now - 6_000}
+      })
+
+    assert result.state.metrics_status == :stale
+    assert result.next_command.name == :tick
+    assert result.state.last_tick_request_at >= now
+    assert result.next_action.name == :watchdog
+    assert result.next_action.delay == 1_000
+
+    waiting = DashboardPage.action(:watchdog, %{}, %{result | next_command: nil})
+    assert waiting.next_command == nil
+    assert waiting.next_action.name == :watchdog
+  end
+
+  test "a successful update restores live status and normal tick scheduling" do
+    before = System.monotonic_time(:millisecond)
+
+    result =
+      DashboardPage.action(:tick_update, %{sample: :fresh}, %Component{
+        state: %{metrics_status: :stale}
+      })
+
+    assert result.state.metrics_status == :live
+    assert result.state.last_tick_at >= before
+    assert result.state.system_metrics == %{sample: :fresh}
+    assert result.next_action.name == :tick
+    assert result.next_action.delay == 5_000
+
+    watching = DashboardPage.action(:watchdog, %{}, result)
+    assert watching.state.metrics_status == :live
+    assert watching.next_command == nil
+    assert watching.next_action.name == :watchdog
+  end
+
+  test "freshness boundary uses three missed five-second intervals" do
+    assert DashboardPage.metrics_status(15_000, 0) == :live
+    assert DashboardPage.metrics_status(15_001, 0) == :stale
+    assert DashboardPage.metrics_dot_class(:stale) == "hd-live-dot hd-live-dot-stale"
+  end
+
+  defp sort_values do
+    [
+      {:memory, :memory},
+      {"memory", :memory},
+      {:reductions, :reductions},
+      {"reductions", :reductions},
+      {:pid, :pid},
+      {"pid", :pid}
+    ]
+  end
+
+  defp assert_sorted(metrics, by) do
+    processes = metrics.processes
+    assert length(processes) == 20
+
+    values =
+      Enum.map(processes, fn {pid, info} ->
+        if by == :pid, do: pid, else: Keyword.fetch!(info, by)
+      end)
+
+    direction = if by == :pid, do: :asc, else: :desc
+    assert values == Enum.sort(values, direction)
   end
 
   test "log timestamps are formatted as UTC" do

@@ -141,6 +141,7 @@
 .hd-sort-btn { appearance: none; font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 4px; cursor: pointer; border: 1px solid rgba(255,255,255,0.08); color: rgba(194,194,194,0.5); background: transparent; box-shadow: none; }
 .hd-sort-btn-active { appearance: none; font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 4px; cursor: pointer; border: 1px solid rgba(167,139,250,0.3); color: #a78bfa; background: rgba(167,139,250,0.12); box-shadow: none; }
 .hd-live-dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; animation: hd-pulse 2s infinite; }
+.hd-live-dot-stale { background: #fbbf24; animation: none; }
 @keyframes hd-pulse { 0%,100%{opacity:1} 50%{opacity:0.25} }
 .hd-log-row { display: grid; grid-template-columns: 58px 68px minmax(0, 1fr); gap: 6px 10px; align-items: start; padding: 9px 4px; }
 .hd-log-row > :last-child { grid-column: 1 / -1; }
