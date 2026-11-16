@@ -31,7 +31,7 @@ defmodule HolodeckWeb.HomePage do
 
       <!-- The footer follows the content's 12-unit bottom gap; its negative margin cancels the shell's bottom padding. -->
       <footer class="relative z-[1] text-center mt-12 -mb-12 pb-8 text-xs text-base-content/30">
-        Made with ♥ by <a href="https://ankhers.dev" class="hover:text-base-content/60 transition-colors">Ankhers</a> · <a href="https://git.sr.ht/~ankhers/holodeck" class="hover:text-base-content/60 transition-colors">Source</a>
+        Made with ♥ by <a href="https://ankhers.dev" class="hover:text-base-content/60 transition-colors">Ankhers</a> · <a href="https://github.com/ankhers/holodeck" class="hover:text-base-content/60 transition-colors">Source</a>
       </footer>
     </HolodeckWeb.Components.AppShell>
     """
